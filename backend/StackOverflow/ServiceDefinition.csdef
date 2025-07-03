@@ -8,9 +8,12 @@
         </Bindings>
       </Site>
     </Sites>
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
+    </ConfigurationSettings>
     <Endpoints>
-      <InputEndpoint name="Endpoint1" protocol="http" port="80" />
+      <InputEndpoint name="Endpoint1" protocol="http" port="5050" />
     </Endpoints>
   </WebRole>
   <WebRole name="HealthStatus.API" vmsize="Standard_D1_v2">
@@ -23,7 +26,7 @@
     </Sites>
     <ConfigurationSettings />
     <Endpoints>
-      <InputEndpoint name="Endpoint1" protocol="http" port="8080" />
+      <InputEndpoint name="Endpoint1" protocol="http" port="5051" />
     </Endpoints>
   </WebRole>
   <WorkerRole name="HealthMonitoringService" vmsize="Standard_D1_v2">

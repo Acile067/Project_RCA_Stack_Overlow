@@ -1,15 +1,13 @@
-﻿using Microsoft.WindowsAzure.Storage.Table;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StackOverflow.Domain.Entities
+namespace StackOverflow.Application.Features.User.Commands.RegisterUser
 {
-    public class User : TableEntity
+    public class RegisterUserDTO
     {
-        public string Id { get; set; } = String.Empty;
         public string Name { get; set; } = String.Empty;
         public string LastName { get; set; } = String.Empty;
         public string Country { get; set; } = String.Empty;
@@ -17,15 +15,5 @@ namespace StackOverflow.Domain.Entities
         public string City { get; set; } = String.Empty;
         public string Email { get; set; } = String.Empty;
         public string Password { get; set; } = String.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
-        public User(string indexNo)
-        {
-            PartitionKey = "User";
-            RowKey = indexNo;
-        }
-        public User()
-        {
-        }
     }
 }

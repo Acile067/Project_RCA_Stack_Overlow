@@ -315,6 +315,10 @@
       <Project>{049cdaa2-809e-4858-8943-6de5ece7b85c}</Project>
       <Name>HealthStatus.Application</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HealthStatus.Domain\HealthStatus.Domain.csproj">
+      <Project>{1b503764-db2f-4d3f-8e6f-52d8f79f21fb}</Project>
+      <Name>HealthStatus.Domain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HealthStatus.Infrastructure\HealthStatus.Infrastructure.csproj">
       <Project>{236d1002-a4e6-433c-81f8-29dece9ea9bb}</Project>
       <Name>HealthStatus.Infrastructure</Name>

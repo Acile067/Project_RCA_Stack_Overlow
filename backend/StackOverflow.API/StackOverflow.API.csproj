@@ -162,7 +162,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -238,6 +238,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+    <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bootstrap.min.js.map" />
@@ -314,6 +315,10 @@
     <ProjectReference Include="..\StackOverflow.Application\StackOverflow.Application.csproj">
       <Project>{d3f31b6d-306d-4504-b3f5-2bd4bd7d6612}</Project>
       <Name>StackOverflow.Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\StackOverflow.Domain\StackOverflow.Domain.csproj">
+      <Project>{f1ae3b38-db9c-4396-a289-72ee4851da43}</Project>
+      <Name>StackOverflow.Domain</Name>
     </ProjectReference>
     <ProjectReference Include="..\StackOverflow.Infrastructure\StackOverflow.Infrastructure.csproj">
       <Project>{68df1e1b-2343-4e15-a98b-72013584da80}</Project>
