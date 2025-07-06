@@ -19,6 +19,9 @@ namespace StackOverflow.Domain.Entities
         public string Password { get; set; } = String.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
+        public string ProfilePictureFileName { get; set; } = String.Empty;
+        public byte[] ProfilePictureContent { get; set; } = Array.Empty<byte>();
+
         public User(string indexNo)
         {
             PartitionKey = "User";

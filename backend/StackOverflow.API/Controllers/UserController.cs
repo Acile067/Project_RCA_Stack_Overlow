@@ -4,6 +4,7 @@ using StackOverflow.Infrastructure.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -19,14 +20,47 @@ namespace StackOverflow.API.Controllers
 
         public UserController()
         {
-            var context = new UserTableContext(); 
-            var repo = new RegisterRepository(context); 
+            var userTableContext = new UserTableContext(); 
+            var profilePictureBlobContext = new ProfilePictureBlobContext();
+            var repo = new RegisterRepository(userTableContext, profilePictureBlobContext); 
             _userService = new RegisterUserService(repo); 
         }
 
         [HttpPost, Route("user/register")]
-        public async Task<IHttpActionResult> CreateUser([FromBody] RegisterUserDTO userDTO)
+        public async Task<IHttpActionResult> CreateUser()
         {
+            if (!Request.Content.IsMimeMultipartContent())
+            {
+                return BadRequest("Unsupported media type");
+            }
+
+            var provider = new MultipartMemoryStreamProvider();
+            await Request.Content.ReadAsMultipartAsync(provider);
+
+            // Ekstrakcija podataka iz forme
+            var form = provider.Contents;
+
+            // Parsiranje form polja
+            var userDTO = new RegisterUserDTO
+            {
+                Name = await GetFormValue(form, "name"),
+                LastName = await GetFormValue(form, "lastName"),
+                Country = await GetFormValue(form, "country"),
+                City = await GetFormValue(form, "city"),
+                Address = await GetFormValue(form, "address"),
+                Email = await GetFormValue(form, "email"),
+                Password = await GetFormValue(form, "password"),
+            };
+
+            // Dobavljanje slike
+            var imageContent = form.FirstOrDefault(c => c.Headers.ContentDisposition.Name.Trim('\"') == "profileImage");
+
+            if (imageContent != null)
+            {
+                userDTO.ProfilePictureFileName = imageContent.Headers.ContentDisposition.FileName.Trim('\"');
+                userDTO.ProfilePictureContent = await imageContent.ReadAsByteArrayAsync();
+            }
+
             try
             {
                 var ret = await _userService.RegisterUserAsync(userDTO);
@@ -38,23 +72,15 @@ namespace StackOverflow.API.Controllers
 
                 return Ok("User registered successfully");
             }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
-                // Log the exception (not implemented here)
                 return InternalServerError(ex);
             }
+        }
+        private async Task<string> GetFormValue(IEnumerable<HttpContent> form, string key)
+        {
+            var content = form.FirstOrDefault(c => c.Headers.ContentDisposition.Name.Trim('\"') == key);
+            return content != null ? await content.ReadAsStringAsync() : string.Empty;
         }
     }
 }

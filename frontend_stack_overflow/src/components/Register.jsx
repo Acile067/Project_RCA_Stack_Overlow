@@ -11,16 +11,19 @@ const Register = () => {
     address: "",
     email: "",
     password: "",
-    /*profileImage: null,*/
+    profileImage: null,
   });
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
     if (type === "file") {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+      const file = files[0];
+      setFormData((prev) => ({ ...prev, [name]: file }));
+      setProfileImagePreview(URL.createObjectURL(file));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -31,19 +34,33 @@ const Register = () => {
     setErrorMessage("");
     setSuccessMessage("");
 
+    if (!formData.profileImage) {
+      setErrorMessage("Profile image is required.");
+      return;
+    }
+
     try {
+      const form = new FormData();
+      for (let key in formData) {
+        if (formData[key]) {
+          form.append(key, formData[key]);
+        }
+      }
+
       const response = await fetch("http://localhost:5050/user/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: form,
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = { ExceptionMessage: await response.text() };
+      }
 
       if (!response.ok) {
-        setErrorMessage(data.message || "Registration failed");
+        setErrorMessage(data.ExceptionMessage || "Registration failed");
         return;
       }
 
@@ -66,6 +83,39 @@ const Register = () => {
         >
           StackOverflow
         </Link>
+
+        <div className="flex justify-center">
+          <label
+            htmlFor="profileImage"
+            className="relative cursor-pointer group"
+          >
+            <img
+              src={
+                profileImagePreview ||
+                "https://avatars.githubusercontent.com/u/583231?v=4"
+              }
+              alt="Profile Preview"
+              className="w-32 h-32 rounded-full object-cover border-4 border-gray-300 group-hover:opacity-80 transition"
+            />
+            <input
+              type="file"
+              id="profileImage"
+              name="profileImage"
+              accept="image/*"
+              onChange={handleChange}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+            <div className="absolute bottom-0 w-full text-center text-sm text-white bg-black bg-opacity-50 rounded-b-full py-1 hidden group-hover:block">
+              Change
+            </div>
+          </label>
+        </div>
+        {!formData.profileImage &&
+          errorMessage === "Profile image is required." && (
+            <p className="text-red-500 text-sm text-center mt-2">
+              Please upload a profile image.
+            </p>
+          )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -224,23 +274,6 @@ const Register = () => {
             />
           </div>
         </div>
-
-        {/*<div>
-          <label
-            htmlFor="profileImage"
-            className="block mb-2 font-medium text-gray-700"
-          >
-            Profile Image
-          </label>
-          <input
-            type="file"
-            id="profileImage"
-            name="profileImage"
-            accept="image/*"
-            onChange={handleChange}
-            className="w-full"
-          />
-        </div>*/}
 
         <button
           type="submit"

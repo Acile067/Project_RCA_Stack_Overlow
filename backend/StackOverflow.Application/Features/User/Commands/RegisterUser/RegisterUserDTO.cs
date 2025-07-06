@@ -15,5 +15,9 @@ namespace StackOverflow.Application.Features.User.Commands.RegisterUser
         public string City { get; set; } = String.Empty;
         public string Email { get; set; } = String.Empty;
         public string Password { get; set; } = String.Empty;
+        public string ProfilePictureFileName { get; set; } = String.Empty;
+        public string ProfilePictureContentType { get; set; } = "image/png";
+        public byte[] ProfilePictureContent { get; set; } = Array.Empty<byte>();
+
     }
 }

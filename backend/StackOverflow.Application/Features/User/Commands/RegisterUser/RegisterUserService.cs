@@ -40,6 +40,11 @@ namespace StackOverflow.Application.Features.User.Commands.RegisterUser
             }
 
             var id = Guid.NewGuid().ToString();
+            var extension = GetExtensionFromContentType(userDTO.ProfilePictureContentType);
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            var cleanName = $"{userDTO.Name}_{userDTO.LastName}".ToLower().Replace(" ", "_");
+            var filename = $"{cleanName}_{timestamp}_{id}{extension}";
+
 
             Domain.Entities.User user = new Domain.Entities.User(id)
             {
@@ -52,11 +57,26 @@ namespace StackOverflow.Application.Features.User.Commands.RegisterUser
                 Email = userDTO.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password),
                 CreatedAt = DateTime.UtcNow,
-                LastUpdatedAt = DateTime.UtcNow
+                LastUpdatedAt = DateTime.UtcNow,
+                ProfilePictureFileName = filename,
+                ProfilePictureContent = userDTO.ProfilePictureContent
             };
 
 
             return await _registerRepository.RegisterAsync(user);
+        }
+        private string GetExtensionFromContentType(string contentType)
+        {
+            if (contentType == "image/jpeg")
+                return ".jpg";
+            else if (contentType == "image/png")
+                return ".png";
+            else if (contentType == "image/gif")
+                return ".gif";
+            else if (contentType == "image/webp")
+                return ".webp";
+            else
+                return ".bin";
         }
     }
 }

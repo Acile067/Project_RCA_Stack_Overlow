@@ -12,10 +12,12 @@ namespace StackOverflow.Infrastructure.Repository
 {
     public class RegisterRepository : IRegisterRepository
     {
-        private readonly UserTableContext _context;
-        public RegisterRepository(UserTableContext context)
+        private readonly UserTableContext _userTableContext;
+        private readonly ProfilePictureBlobContext _profilePictureBlobContext;
+        public RegisterRepository(UserTableContext userTableContext, ProfilePictureBlobContext profilePictureBlobContext)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _userTableContext = userTableContext ?? throw new ArgumentNullException(nameof(userTableContext));
+            _profilePictureBlobContext = profilePictureBlobContext ?? throw new ArgumentNullException(nameof(profilePictureBlobContext)); ;
         }
         public async Task<bool> IsEmailAvailableAsync(string email)
         {       
@@ -25,7 +27,7 @@ namespace StackOverflow.Infrastructure.Repository
             }
             try
             {
-                return !await _context.IsEmailExistingAsync(email);
+                return !await _userTableContext.IsEmailExistingAsync(email);
             }
             catch (Exception ex)
             {
@@ -43,7 +45,9 @@ namespace StackOverflow.Infrastructure.Repository
 
             try
             {
-                return await _context.InsertOrUpdateEntityAsync(user);
+                var ret1 = await _profilePictureBlobContext.UploadImgAsync("profilepictures", user.ProfilePictureFileName, user.ProfilePictureContent);
+                var ret2 = await _userTableContext.InsertOrUpdateEntityAsync(user);
+                return (ret1 && ret2);
             }
             catch (Exception ex)
             {
