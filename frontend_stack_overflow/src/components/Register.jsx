@@ -17,6 +17,7 @@ const Register = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const API_URL = import.meta.env.VITE_BACKEND_STACKOVERFLOW_API_URL;
 
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
@@ -47,7 +48,7 @@ const Register = () => {
         }
       }
 
-      const response = await fetch("http://localhost:5050/user/register", {
+      const response = await fetch(`${API_URL}/user/register`, {
         method: "POST",
         body: form,
       });
