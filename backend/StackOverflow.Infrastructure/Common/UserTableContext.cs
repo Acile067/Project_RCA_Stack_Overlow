@@ -63,5 +63,24 @@ namespace StackOverflow.Infrastructure.Common
                 return false;
             }
         }
+
+        public async Task<Domain.Entities.User> GetUserByEmailAsync(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return null; 
+
+            try
+            {
+                TableQuery<Domain.Entities.User> query = new TableQuery<Domain.Entities.User>().Where(
+                    TableQuery.GenerateFilterCondition("Email", QueryComparisons.Equal, email));
+
+                var result = await _table.ExecuteQuerySegmentedAsync(query, null);
+                return result.Results.FirstOrDefault(); 
+            }
+            catch (StorageException)
+            {
+                return null; 
+            }
+        }
     }
 }

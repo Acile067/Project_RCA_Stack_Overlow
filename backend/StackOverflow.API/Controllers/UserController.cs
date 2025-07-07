@@ -1,4 +1,5 @@
-﻿using StackOverflow.Application.Features.User.Commands.RegisterUser;
+﻿using StackOverflow.Application.Features.Token.Command;
+using StackOverflow.Application.Features.User.Commands.RegisterUser;
 using StackOverflow.Infrastructure.Common;
 using StackOverflow.Infrastructure.Repository;
 using System;
@@ -17,13 +18,15 @@ namespace StackOverflow.API.Controllers
     {
 
         private readonly RegisterUserService _userService;
+        private readonly CreateTokenService _createTokenService;
 
         public UserController()
         {
-            var userTableContext = new UserTableContext(); 
+            var userTableContext = new UserTableContext();
             var profilePictureBlobContext = new ProfilePictureBlobContext();
-            var repo = new RegisterRepository(userTableContext, profilePictureBlobContext); 
-            _userService = new RegisterUserService(repo); 
+            var repo = new RegisterRepository(userTableContext, profilePictureBlobContext);
+            _userService = new RegisterUserService(repo);
+            _createTokenService = new CreateTokenService(new LoginRepository(userTableContext));
         }
 
         [HttpPost, Route("user/register")]
@@ -81,6 +84,32 @@ namespace StackOverflow.API.Controllers
         {
             var content = form.FirstOrDefault(c => c.Headers.ContentDisposition.Name.Trim('\"') == key);
             return content != null ? await content.ReadAsStringAsync() : string.Empty;
+        }
+
+        [HttpPost, Route("user/login")]
+        public async Task<IHttpActionResult> LoginAsync ([FromBody] CreateTokenDTO createTokenDTO)
+        {
+            
+            if (createTokenDTO == null)
+            {
+                return BadRequest("Invalid login data");
+            }
+            
+            try
+            {
+                var tokenResponse = await _createTokenService.CreateTokenAsync(createTokenDTO);
+                
+                if (tokenResponse == null || !tokenResponse.isSuccess)
+                {
+                    return Unauthorized();
+                }
+
+                return Ok(tokenResponse);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
     }
 }

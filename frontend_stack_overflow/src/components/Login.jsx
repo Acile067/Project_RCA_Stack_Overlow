@@ -1,15 +1,48 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_BACKEND_STACKOVERFLOW_API_URL;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Ovde dodaj logiku za login (poziv API-ja ili lokalna validacija)
-    console.log("Email:", email);
-    console.log("Password:", password);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(`${API_URL}/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.status === 401) {
+        setErrorMessage("Wrong email or password.");
+        return;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        setErrorMessage("Server error: " + errorText);
+        return;
+      }
+
+      const data = await response.json();
+      if (data.isSuccess) {
+        localStorage.setItem("access_token", data.Token);
+        navigate("/");
+      } else {
+        setErrorMessage("Login failed.");
+      }
+    } catch (error) {
+      setErrorMessage("Unexpected error: " + error.message);
+    }
   };
 
   return (
@@ -60,6 +93,11 @@ const Login = () => {
         >
           Login
         </button>
+        {errorMessage && (
+          <p className="mt-4 text-center text-red-600 font-medium">
+            {errorMessage}
+          </p>
+        )}
         <p className="mt-4 text-center text-gray-600">
           Don't have an account?{" "}
           <Link to="/register" className="text-blue-600 hover:underline">

@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Contracts\ILoginRepository.cs" />
     <Compile Include="Contracts\IRegisterRepository.cs" />
+    <Compile Include="Entities\TokenUserDto.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

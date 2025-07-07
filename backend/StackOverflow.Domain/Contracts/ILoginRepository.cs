@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StackOverflow.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace StackOverflow.Domain.Contracts
 {
     public interface ILoginRepository
     {
-        Task<bool> LoginAsync(string email, string password);
+        Task<TokenUserDto> LoginAsync(string email, string password);
     }
 }
