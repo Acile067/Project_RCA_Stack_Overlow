@@ -42,5 +42,31 @@ namespace StackOverflow.Infrastructure.Common
                 return false;
             }
         }
+        public async Task<byte[]> DownloadImgAsync(string containerName, string fileName)
+        {
+            if (string.IsNullOrEmpty(containerName) || string.IsNullOrEmpty(fileName))
+            {
+                return null;
+            }
+            try
+            {
+                CloudBlobContainer container = blobStorage.GetContainerReference(containerName);
+                CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
+                if (await blockBlob.ExistsAsync())
+                {
+                    using (var memoryStream = new System.IO.MemoryStream())
+                    {
+                        await blockBlob.DownloadToStreamAsync(memoryStream);
+                        return memoryStream.ToArray();
+                    }
+                }
+                return null;
+            }
+            catch (StorageException ex)
+            {
+                // Log the exception (not implemented here)
+                return null;
+            }
+        }
     }
 }

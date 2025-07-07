@@ -43,7 +43,9 @@ namespace StackOverflow.Application.Features.Token.Command
                 new Claim("id", retUser.Id),
                 new Claim("name", retUser.Name),
                 new Claim("lastName", retUser.LastName),
-                new Claim("email", retUser.Email)
+                new Claim("email", retUser.Email),
+                new Claim("profilePictureFileName", retUser.ProfilePictureFileName)
+
             };
 
             var token = new JwtSecurityToken(

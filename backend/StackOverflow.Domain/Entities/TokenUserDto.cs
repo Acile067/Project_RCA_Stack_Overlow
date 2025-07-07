@@ -12,5 +12,6 @@ namespace StackOverflow.Domain.Entities
         public string Name { get; set; } = String.Empty;
         public string LastName { get; set; } = String.Empty;
         public string Email { get; set; } = String.Empty;
+        public string ProfilePictureFileName { get; set; } = String.Empty;
     }
 }

@@ -37,6 +37,7 @@ namespace StackOverflow.Infrastructure.Repository
                         Name = user.Name,
                         LastName = user.LastName,
                         Email = user.Email,
+                        ProfilePictureFileName = user.ProfilePictureFileName
                     };
                 }
 

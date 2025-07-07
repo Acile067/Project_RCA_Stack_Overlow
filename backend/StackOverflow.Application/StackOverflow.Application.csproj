@@ -103,6 +103,7 @@
     <Compile Include="Features\Token\Command\CreateTokenService.cs" />
     <Compile Include="Features\User\Commands\RegisterUser\RegisterUserDTO.cs" />
     <Compile Include="Features\User\Commands\RegisterUser\RegisterUserService.cs" />
+    <Compile Include="Features\User\Quieres\ProfilePictureQuiery\UserProfilePictureService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -111,9 +112,7 @@
       <Name>StackOverflow.Domain</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Features\User\Quieres\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />

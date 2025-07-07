@@ -73,6 +73,7 @@
     <Compile Include="Common\UserTableContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\LoginRepository.cs" />
+    <Compile Include="Repository\ProfilePictureRepository.cs" />
     <Compile Include="Repository\RegisterRepository.cs" />
   </ItemGroup>
   <ItemGroup>

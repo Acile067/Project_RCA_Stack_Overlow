@@ -26,3 +26,14 @@ export const isAuthenticated = () => {
   const token = getToken();
   return token && isTokenValid(token);
 };
+
+export const getUserIdFromToken = () => {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.id || null;
+  } catch {
+    return null;
+  }
+};

@@ -1,10 +1,14 @@
-﻿using StackOverflow.Application.Features.Token.Command;
+﻿using StackOverflow.API.Areas.HelpPage;
+using StackOverflow.Application.Features.Token.Command;
 using StackOverflow.Application.Features.User.Commands.RegisterUser;
+using StackOverflow.Application.Features.User.Quieres.ProfilePictureQuiery;
 using StackOverflow.Infrastructure.Common;
 using StackOverflow.Infrastructure.Repository;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -19,6 +23,7 @@ namespace StackOverflow.API.Controllers
 
         private readonly RegisterUserService _userService;
         private readonly CreateTokenService _createTokenService;
+        private readonly UserProfilePictureService _userProfilePictureService;
 
         public UserController()
         {
@@ -27,6 +32,8 @@ namespace StackOverflow.API.Controllers
             var repo = new RegisterRepository(userTableContext, profilePictureBlobContext);
             _userService = new RegisterUserService(repo);
             _createTokenService = new CreateTokenService(new LoginRepository(userTableContext));
+            _userProfilePictureService = new UserProfilePictureService(new ProfilePictureRepository(profilePictureBlobContext));
+
         }
 
         [HttpPost, Route("user/register")]
@@ -111,5 +118,53 @@ namespace StackOverflow.API.Controllers
                 return InternalServerError(ex);
             }
         }
+
+        [Authorize]
+        [HttpGet, Route("user/profileimage")]
+        public async Task<IHttpActionResult> GetProfileImage()
+        {
+            var identity = User.Identity as System.Security.Claims.ClaimsIdentity;
+            var fileName = identity?.Claims.FirstOrDefault(c => c.Type == "profilePictureFileName")?.Value;
+
+            if (string.IsNullOrEmpty(fileName))
+                return BadRequest("Profile picture filename not found in token.");
+
+            try
+            {
+                var imageBytes = await _userProfilePictureService.GetProfilePictureAsync(fileName);
+                if (imageBytes == null || imageBytes.Length == 0)
+                    return NotFound();
+
+                string contentType = GetMimeTypeFromFileName(fileName);
+
+                var response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new ByteArrayContent(imageBytes)
+                };
+                response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+
+                return ResponseMessage(response);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+        private string GetMimeTypeFromFileName(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+            if (extension == ".jpg" || extension == ".jpeg")
+                return "image/jpeg";
+            else if (extension == ".png")
+                return "image/png";
+            else if (extension == ".gif")
+                return "image/gif";
+            else if (extension == ".webp")
+                return "image/webp";
+            else
+                return "application/octet-stream";
+        }
+
     }
 }
