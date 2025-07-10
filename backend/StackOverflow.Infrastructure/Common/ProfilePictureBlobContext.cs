@@ -68,5 +68,23 @@ namespace StackOverflow.Infrastructure.Common
                 return null;
             }
         }
+        public async Task<bool> DeleteImgAsync(string containerName, string fileName)
+        {
+            if (string.IsNullOrEmpty(containerName) || string.IsNullOrEmpty(fileName))
+            {
+                return false;
+            }
+            try
+            {
+                CloudBlobContainer container = blobStorage.GetContainerReference(containerName);
+                CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
+                return await blockBlob.DeleteIfExistsAsync();
+            }
+            catch (StorageException ex)
+            {
+                // Log the exception (not implemented here)
+                return false;
+            }
+        }
     }
 }

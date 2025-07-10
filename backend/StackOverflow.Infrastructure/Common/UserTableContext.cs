@@ -39,6 +39,7 @@ namespace StackOverflow.Infrastructure.Common
             }
             catch (StorageException ex)
             {
+                Console.WriteLine("Azure Table insert error: " + ex.Message);
                 // Log the exception (not implemented here)
                 return false;
             }
@@ -67,7 +68,7 @@ namespace StackOverflow.Infrastructure.Common
         public async Task<Domain.Entities.User> GetUserByEmailAsync(string email)
         {
             if (string.IsNullOrEmpty(email))
-                return null; 
+                return null;
 
             try
             {
@@ -75,11 +76,29 @@ namespace StackOverflow.Infrastructure.Common
                     TableQuery.GenerateFilterCondition("Email", QueryComparisons.Equal, email));
 
                 var result = await _table.ExecuteQuerySegmentedAsync(query, null);
-                return result.Results.FirstOrDefault(); 
+                return result.Results.FirstOrDefault();
             }
             catch (StorageException)
             {
-                return null; 
+                return null;
+            }
+        }
+        public async Task<Domain.Entities.User> GetUserByIdAsync(string userId)
+        {
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+            try
+            {
+                TableOperation retrieveOperation = TableOperation.Retrieve<Domain.Entities.User>("User", userId);
+                var result = await _table.ExecuteAsync(retrieveOperation);
+                return result.Result as Domain.Entities.User;
+            }
+            catch (StorageException)
+            {
+                return null;
             }
         }
     }

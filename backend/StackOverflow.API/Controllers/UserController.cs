@@ -1,6 +1,8 @@
 ﻿using StackOverflow.API.Areas.HelpPage;
 using StackOverflow.Application.Features.Token.Command;
 using StackOverflow.Application.Features.User.Commands.RegisterUser;
+using StackOverflow.Application.Features.User.Commands.UpdateUser;
+using StackOverflow.Application.Features.User.Quieres.GetUserById;
 using StackOverflow.Application.Features.User.Quieres.ProfilePictureQuiery;
 using StackOverflow.Infrastructure.Common;
 using StackOverflow.Infrastructure.Repository;
@@ -24,6 +26,8 @@ namespace StackOverflow.API.Controllers
         private readonly RegisterUserService _userService;
         private readonly CreateTokenService _createTokenService;
         private readonly UserProfilePictureService _userProfilePictureService;
+        private readonly GetUserByIdService _getUserByIdService;
+        private readonly UpdateUserService _updateUserService;
 
         public UserController()
         {
@@ -33,6 +37,8 @@ namespace StackOverflow.API.Controllers
             _userService = new RegisterUserService(repo);
             _createTokenService = new CreateTokenService(new LoginRepository(userTableContext));
             _userProfilePictureService = new UserProfilePictureService(new ProfilePictureRepository(profilePictureBlobContext));
+            _getUserByIdService = new GetUserByIdService(new UserRepository(userTableContext, profilePictureBlobContext));
+            _updateUserService = new UpdateUserService(new UserRepository(userTableContext, profilePictureBlobContext), new ProfilePictureRepository(profilePictureBlobContext));
 
         }
 
@@ -55,6 +61,7 @@ namespace StackOverflow.API.Controllers
             {
                 Name = await GetFormValue(form, "name"),
                 LastName = await GetFormValue(form, "lastName"),
+                Gender = await GetFormValue(form, "gender"),
                 Country = await GetFormValue(form, "country"),
                 City = await GetFormValue(form, "city"),
                 Address = await GetFormValue(form, "address"),
@@ -94,18 +101,18 @@ namespace StackOverflow.API.Controllers
         }
 
         [HttpPost, Route("user/login")]
-        public async Task<IHttpActionResult> LoginAsync ([FromBody] CreateTokenDTO createTokenDTO)
+        public async Task<IHttpActionResult> LoginAsync([FromBody] CreateTokenDTO createTokenDTO)
         {
-            
+
             if (createTokenDTO == null)
             {
                 return BadRequest("Invalid login data");
             }
-            
+
             try
             {
                 var tokenResponse = await _createTokenService.CreateTokenAsync(createTokenDTO);
-                
+
                 if (tokenResponse == null || !tokenResponse.isSuccess)
                 {
                     return Unauthorized();
@@ -166,5 +173,91 @@ namespace StackOverflow.API.Controllers
                 return "application/octet-stream";
         }
 
+        [Authorize]
+        [HttpGet, Route("user/{id}")]
+        public async Task<IHttpActionResult> GetUserById(string id)
+        {
+            var identity = User.Identity as System.Security.Claims.ClaimsIdentity;
+            var tokenid = identity?.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+            if (tokenid != id)
+            {
+                return Unauthorized();
+            }
+
+
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("User ID cannot be null or empty.");
+            }
+            try
+            {
+                var user = await _getUserByIdService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        [Authorize]
+        [HttpPut, Route("user/{id}")]
+        public async Task<IHttpActionResult> UpdateUser(string id)
+        {
+            var identity = User.Identity as System.Security.Claims.ClaimsIdentity;
+            var oldProfilePicture = identity?.Claims.FirstOrDefault(c => c.Type == "profilePictureFileName")?.Value;
+
+            if (string.IsNullOrEmpty(oldProfilePicture))
+                return BadRequest("Profile picture filename not found in token.");
+
+            if (!Request.Content.IsMimeMultipartContent())
+            {
+                return BadRequest("Unsupported media type");
+            }
+            var provider = new MultipartMemoryStreamProvider();
+            await Request.Content.ReadAsMultipartAsync(provider);
+            // Ekstrakcija podataka iz forme
+            var form = provider.Contents;
+            // Parsiranje form polja
+            var updateUserDTO = new UpdateUserDTO
+            {
+                Id = id,
+                Name = await GetFormValue(form, "name"),
+                LastName = await GetFormValue(form, "lastName"),
+                Gender = await GetFormValue(form, "gender"),
+                Country = await GetFormValue(form, "country"),
+                City = await GetFormValue(form, "city"),
+                Address = await GetFormValue(form, "address"),
+                Email = await GetFormValue(form, "email"),
+                Password = await GetFormValue(form, "password"),
+                OldProfilePictureFileName = oldProfilePicture
+            };
+
+            // Dobavljanje slike
+            var imageContent = form.FirstOrDefault(c => c.Headers.ContentDisposition.Name.Trim('\"') == "profileImage");
+            if (imageContent != null)
+            {
+                updateUserDTO.ProfilePictureFileName = imageContent.Headers.ContentDisposition.FileName.Trim('\"');
+                updateUserDTO.ProfilePictureContent = await imageContent.ReadAsByteArrayAsync();
+            }
+
+            try
+            {
+                var ret = await _updateUserService.UpdateUserAsync(updateUserDTO);
+                if (!ret)
+                {
+                    return BadRequest("User update failed");
+                }
+                return Ok("User updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
     }
 }

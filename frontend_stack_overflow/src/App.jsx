@@ -16,6 +16,7 @@ const HomePage = React.lazy(() => import("./pages/HomePage"));
 const RegisterPage = React.lazy(() => import("./pages/RegisterPage"));
 const LoginPage = React.lazy(() => import("./pages/LoginPage"));
 const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
+const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));
 
 const createAppRoutes = () => (
   <>
@@ -28,6 +29,14 @@ const createAppRoutes = () => (
         element={
           <PrivateRoute>
             <ProfilePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="settings/:id"
+        element={
+          <PrivateRoute>
+            <SettingsPage />
           </PrivateRoute>
         }
       />

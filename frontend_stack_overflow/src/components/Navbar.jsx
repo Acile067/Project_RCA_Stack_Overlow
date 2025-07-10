@@ -166,6 +166,13 @@ const Navbar = () => {
                   >
                     Profile
                   </Link>
+                  <Link
+                    to={`/settings/${userId}`}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    Settings
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -232,10 +239,18 @@ const Navbar = () => {
               <>
                 <li>
                   <Link
-                    to="/profile"
+                    to={`/profile/${userId}`}
                     className="block mt-1 md:hidden py-2 px-3 text-white bg-gray-900 rounded-lg hover:bg-gray-800 text-base font-medium text-center"
                   >
                     Profile
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to={`/settings/${userId}`}
+                    className="block mt-1 md:hidden py-2 px-3 text-white bg-gray-900 rounded-lg hover:bg-gray-800 text-base font-medium text-center"
+                  >
+                    Settings
                   </Link>
                 </li>
                 <li>

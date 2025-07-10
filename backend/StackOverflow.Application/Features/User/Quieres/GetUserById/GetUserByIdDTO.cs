@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StackOverflow.Application.Features.User.Commands.RegisterUser
+namespace StackOverflow.Application.Features.User.Quieres.GetUserById
 {
-    public class RegisterUserDTO
+    public class GetUserByIdDTO
     {
         public string Name { get; set; } = String.Empty;
         public string LastName { get; set; } = String.Empty;
@@ -15,10 +15,5 @@ namespace StackOverflow.Application.Features.User.Commands.RegisterUser
         public string Address { get; set; } = String.Empty;
         public string City { get; set; } = String.Empty;
         public string Email { get; set; } = String.Empty;
-        public string Password { get; set; } = String.Empty;
-        public string ProfilePictureFileName { get; set; } = String.Empty;
-        public string ProfilePictureContentType { get; set; } = "image/png";
-        public byte[] ProfilePictureContent { get; set; } = Array.Empty<byte>();
-
     }
 }

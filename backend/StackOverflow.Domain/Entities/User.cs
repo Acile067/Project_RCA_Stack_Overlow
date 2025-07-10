@@ -12,6 +12,7 @@ namespace StackOverflow.Domain.Entities
         public string Id { get; set; } = String.Empty;
         public string Name { get; set; } = String.Empty;
         public string LastName { get; set; } = String.Empty;
+        public string Gender { get; set; } = String.Empty;
         public string Country { get; set; } = String.Empty;
         public string Address { get; set; } = String.Empty;
         public string City { get; set; } = String.Empty;
@@ -26,6 +27,7 @@ namespace StackOverflow.Domain.Entities
         {
             PartitionKey = "User";
             RowKey = indexNo;
+            Id = indexNo;
         }
         public User()
         {

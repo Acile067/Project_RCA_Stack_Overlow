@@ -75,6 +75,7 @@
     <Compile Include="Repository\LoginRepository.cs" />
     <Compile Include="Repository\ProfilePictureRepository.cs" />
     <Compile Include="Repository\RegisterRepository.cs" />
+    <Compile Include="Repository\UserRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StackOverflow.Application\StackOverflow.Application.csproj">

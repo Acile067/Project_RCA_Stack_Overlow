@@ -16,6 +16,24 @@ namespace StackOverflow.Infrastructure.Repository
             _blobContext = blobContext ?? throw new ArgumentNullException(nameof(blobContext));
         }
 
+        public Task<bool> DeleteProfilePictureAsync(string fileName)
+        {
+            
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return Task.FromResult(false);
+            }
+            try
+            {
+                return _blobContext.DeleteImgAsync("profilepictures", fileName);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (not implemented here)
+                return Task.FromResult(false);
+            }
+        }
+
         public async Task<byte[]> DownloadProfilePictureAsync(string fileName)
         {
             
@@ -32,6 +50,24 @@ namespace StackOverflow.Infrastructure.Repository
             {
                 // Log the exception (not implemented here)
                 return null;
+            }
+        }
+
+        public Task<bool> UploadProfilePictureAsync(string fileName, byte[] fileContent)
+        {
+            
+            if (string.IsNullOrEmpty(fileName) || fileContent == null || fileContent.Length == 0)
+            {
+                return Task.FromResult(false);
+            }
+            try
+            {
+                return _blobContext.UploadImgAsync("profilepictures", fileName, fileContent);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (not implemented here)
+                return Task.FromResult(false);
             }
         }
     }

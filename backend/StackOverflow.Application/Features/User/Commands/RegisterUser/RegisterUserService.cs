@@ -48,9 +48,9 @@ namespace StackOverflow.Application.Features.User.Commands.RegisterUser
 
             Domain.Entities.User user = new Domain.Entities.User(id)
             {
-                Id = id,
                 Name = userDTO.Name,
                 LastName = userDTO.LastName,
+                Gender = userDTO.Gender,
                 Country = userDTO.Country,
                 Address = userDTO.Address,
                 City = userDTO.City,
