@@ -32,7 +32,7 @@ export const getUserIdFromToken = () => {
   if (!token) return null;
   try {
     const decoded = jwtDecode(token);
-    return decoded.UserId || null;
+    return decoded.nameid || null;
   } catch {
     return null;
   }

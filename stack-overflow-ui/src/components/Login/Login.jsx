@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { loginUser } from "../../services/userService";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,7 +36,12 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+        <Link
+          to="/"
+          className="block w-full text-2xl font-semibold mb-6 text-center"
+        >
+          StackOverflow
+        </Link>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
