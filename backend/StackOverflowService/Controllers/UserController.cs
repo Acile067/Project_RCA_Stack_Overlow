@@ -96,6 +96,60 @@ namespace StackOverflowService.Controllers
                 profilePictureUrl = user.ProfilePictureUrl
             });
         }
+        [Authorize]
+        [HttpGet]
+        [Route("api/users/profile")]
+        public async Task<IHttpActionResult> GetUserProfile()
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
 
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null)
+                return Content(HttpStatusCode.NotFound, "User not found.");
+
+            var dto = new UserProfileDto
+            {
+                FullName = user.FullName,
+                Gender = user.Gender,
+                Country = user.Country,
+                City = user.City,
+                Address = user.Address,
+                ProfilePictureUrl = user.ProfilePictureUrl
+            };
+
+            return Ok(dto);
+        }
+
+        [Authorize]
+        [HttpPut]
+        [Route("api/users/update")]
+        public async Task<IHttpActionResult> Update()
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            var dto = new UpdateUserDto
+            {
+                FullName = HttpContext.Current.Request.Form["fullName"],
+                Gender = HttpContext.Current.Request.Form["gender"],
+                Country = HttpContext.Current.Request.Form["country"],
+                City = HttpContext.Current.Request.Form["city"],
+                Address = HttpContext.Current.Request.Form["address"],
+                Password = HttpContext.Current.Request.Form["password"],
+                ProfileImage = HttpContext.Current.Request.Files["profileImage"]
+            };
+
+            var result = await _userService.UpdateUserAsync(email, dto);
+
+            if (result.Success)
+                return Ok("User updated.");
+            else
+                return Content(HttpStatusCode.BadRequest, result);
+        }
     }
 }

@@ -37,3 +37,32 @@ export const fetchUserProfilePicture = async (token) => {
 
   return data.profilePictureUrl;
 };
+
+export const fetchUserProfile = async (token) => {
+  const response = await fetch(`${API_URL}/users/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) throw new Error("Failed to fetch user profile");
+
+  return await response.json();
+};
+
+export const updateUserProfile = async (formData, token) => {
+  const response = await fetch(`${API_URL}/users/update`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData, // mora biti FormData zbog slike
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData?.message || "Failed to update profile");
+  }
+
+  return await response.text(); // jer backend vraća "User updated."
+};

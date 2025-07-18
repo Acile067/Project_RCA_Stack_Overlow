@@ -118,5 +118,51 @@ namespace StackOverflowService.Services
             var token =  handler.CreateToken(tokenDescriptor);
             return handler.WriteToken(token);
         }
+        public async Task<ValidationResponseDto> UpdateUserAsync(string email, UpdateUserDto dto)
+        {
+            var errors = new List<FieldError>();
+
+            var userEntity = await _userRepo.GetByEmailAsync(email);
+            if (userEntity == null)
+            {
+                errors.Add(new FieldError { Field = "email", Message = "User not found." });
+                return new ValidationResponseDto { Success = false, Errors = errors };
+            }
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+            {
+                if (dto.Password.Length < 6)
+                {
+                    errors.Add(new FieldError { Field = "password", Message = "Password must be at least 6 characters." });
+                    return new ValidationResponseDto { Success = false, Errors = errors };
+                }
+
+                userEntity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+            }
+
+            // update polja
+            userEntity.FullName = dto.FullName ?? userEntity.FullName;
+            userEntity.Gender = dto.Gender ?? userEntity.Gender;
+            userEntity.Country = dto.Country ?? userEntity.Country;
+            userEntity.City = dto.City ?? userEntity.City;
+            userEntity.Address = dto.Address ?? userEntity.Address;
+
+            // ako ima nova profilna slika
+            if (dto.ProfileImage != null)
+            {
+                // Ako korisnik već ima sliku, izbriši staru iz blob-a
+                if (!string.IsNullOrEmpty(userEntity.ProfilePictureUrl))
+                {
+                    await _profilePictureBlobService.DeleteFileAsync(userEntity.ProfilePictureUrl);
+                }
+
+                // Upload nove slike
+                var url = await _profilePictureBlobService.UploadFileAsync(dto.ProfileImage);
+                userEntity.ProfilePictureUrl = url;
+            }
+
+            await _userRepo.UpdateUserAsync(userEntity);
+
+            return new ValidationResponseDto { Success = true };
+        }
     }
 }

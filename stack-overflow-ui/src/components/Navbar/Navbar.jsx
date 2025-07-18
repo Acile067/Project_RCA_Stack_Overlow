@@ -9,7 +9,6 @@ import {
   getUserIdFromToken,
 } from "../../services/authService";
 import { fetchUserProfilePicture } from "../../services/userService";
-import { createProfilePictureResponse } from "../../models/profilePictureResponseModel";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,7 +35,7 @@ const Navbar = () => {
       const token = localStorage.getItem("access_token");
       fetchUserProfilePicture(token)
         .then((url) => {
-          setProfileImage(url); // Direktno postavi URL
+          setProfileImage(url);
         })
         .catch(() => setProfileImage(null));
     }

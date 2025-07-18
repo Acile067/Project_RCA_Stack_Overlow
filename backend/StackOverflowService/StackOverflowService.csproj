@@ -279,6 +279,8 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DTOs\CreateUserDto.cs" />
     <Compile Include="DTOs\LoginDto.cs" />
+    <Compile Include="DTOs\UpdateUserDto.cs" />
+    <Compile Include="DTOs\UserProfileDto.cs" />
     <Compile Include="DTOs\ValidationResponseDto.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Global.asax.cs">

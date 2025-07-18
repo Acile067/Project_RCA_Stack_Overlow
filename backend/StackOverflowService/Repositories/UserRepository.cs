@@ -49,5 +49,10 @@ namespace StackOverflowService.Repositories
             var result = await _table.ExecuteQuerySegmentedAsync(query, null);
             return result.Results.FirstOrDefault();
         }
+        public async Task UpdateUserAsync(UserTableEntity userEntity)
+        {
+            var updateOperation = TableOperation.Replace(userEntity);
+            await _table.ExecuteAsync(updateOperation);
+        }
     }
 }
