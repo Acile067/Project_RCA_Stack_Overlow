@@ -1,9 +1,14 @@
-﻿using StackOverflowService.DTOs;
+﻿using Microsoft.IdentityModel.Tokens;
+using StackOverflowService.AzureStorage;
+using StackOverflowService.DTOs;
 using StackOverflowService.Entities;
 using StackOverflowService.Repositories;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Helpers;
@@ -85,6 +90,33 @@ namespace StackOverflowService.Services
                 Success = true,
                 Errors = new List<FieldError>()
             };
+        }
+        public async Task<UserTableEntity> GetUserByEmailAsync(string email)
+        {
+            return await _userRepo.GetByEmailAsync(email);
+        }
+        public async Task<string> GenerateJwtToken(UserTableEntity user)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes("070342f4-b749-4e1c-ab79-e73cfc2348a2");
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.RowKey),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7),
+                Issuer = "http://localhost:5050/",
+                Audience = "http://localhost:3000/",
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token =  handler.CreateToken(tokenDescriptor);
+            return handler.WriteToken(token);
         }
     }
 }

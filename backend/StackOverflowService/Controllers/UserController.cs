@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -47,6 +48,35 @@ namespace StackOverflowService.Controllers
                 return Ok("User created successfully.");
             else
                 return Content(HttpStatusCode.BadRequest, result);
+        }
+        [HttpPost]
+        [Route("api/users/login")]
+        public async Task<IHttpActionResult> Login(LoginDto dto)
+        {
+            var user = await _userService.GetUserByEmailAsync(dto.Email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+            {
+                return Content(HttpStatusCode.BadRequest, new { message = "Invalid credentials." });
+            }
+
+            var token = await _userService.GenerateJwtToken(user);
+
+            return Ok(new
+            {
+                token,
+                message = "ok"
+            });
+        }
+        [Authorize]
+        [HttpGet]
+        [Route("api/users/test/autorize")]
+        public IHttpActionResult GetProfile()
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            var id = identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return Ok(new { email, id });
         }
     }
 }

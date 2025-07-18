@@ -40,5 +40,14 @@ namespace StackOverflowService.Repositories
 
             return segment.Results.Any(); // true ako postoji korisnik sa tim emailom
         }
+        public async Task<UserTableEntity> GetByEmailAsync(string email)
+        {
+            var query = new TableQuery<UserTableEntity>().Where(
+                TableQuery.GenerateFilterCondition("Email", QueryComparisons.Equal, email)
+            );
+
+            var result = await _table.ExecuteQuerySegmentedAsync(query, null);
+            return result.Results.FirstOrDefault();
+        }
     }
 }
