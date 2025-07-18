@@ -30,16 +30,13 @@ const Navbar = () => {
     setAuthenticated(auth);
 
     if (auth) {
-      setUserId(getUserIdFromToken());
+      const userId = getUserIdFromToken();
+      setUserId(userId);
 
       const token = localStorage.getItem("access_token");
       fetchUserProfilePicture(token)
-        .then((data) => {
-          const parsed = createProfilePictureResponse(data);
-          if (parsed.success && parsed.profilePicture) {
-            const imageSrc = `data:${parsed.profilePictureContentType};base64,${parsed.profilePicture}`;
-            setProfileImage(imageSrc);
-          }
+        .then((url) => {
+          setProfileImage(url); // Direktno postavi URL
         })
         .catch(() => setProfileImage(null));
     }

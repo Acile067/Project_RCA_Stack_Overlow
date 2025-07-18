@@ -24,15 +24,16 @@ export const fetchUserProfilePicture = async (token) => {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
   const response = await fetch(`${API_URL}/users/profilepicture`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
-  let data;
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error("Invalid profile picture response");
+  const data = await response.json();
+
+  if (!data.success || !data.profilePictureUrl) {
+    throw new Error("Failed to fetch profile picture URL");
   }
 
-  return data;
+  return data.profilePictureUrl;
 };

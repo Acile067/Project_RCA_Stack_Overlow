@@ -3,6 +3,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,13 @@ namespace StackOverflowService.Repositories
             var blobClient = storageAccount.CreateCloudBlobClient();
             _container = blobClient.GetContainerReference("profilepictures");
             _container.CreateIfNotExists();
+
+            var permissions = new BlobContainerPermissions
+            {
+                PublicAccess = BlobContainerPublicAccessType.Blob
+            };
+
+            _container.SetPermissionsAsync(permissions);
         }
 
         public async Task<string> UploadFileAsync(HttpPostedFile file)

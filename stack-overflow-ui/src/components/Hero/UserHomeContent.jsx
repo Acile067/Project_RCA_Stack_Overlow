@@ -10,10 +10,10 @@ const UserHomeContent = () => {
     const fetchProfile = async () => {
       try {
         const token = getToken();
-        const data = await testAuthorization(token);
-        setProfile(data);
+        const userData = await testAuthorization(token);
+        setProfile(userData);
       } catch (err) {
-        setError("Failed to fetch profile info.");
+        setError("Failed to fetch user info.");
       }
     };
 
@@ -25,7 +25,6 @@ const UserHomeContent = () => {
       <h1 className="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
         Welcome back, <span className="text-blue-400">StackOverflower</span>
       </h1>
-      <p className="text-lg text-gray-700 tracking-wide">Ask anything</p>
 
       {profile && (
         <div className="mt-6 text-left">

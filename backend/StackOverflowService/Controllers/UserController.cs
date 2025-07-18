@@ -78,5 +78,24 @@ namespace StackOverflowService.Controllers
 
             return Ok(new { email, id });
         }
+        [Authorize]
+        [HttpGet]
+        [Route("api/users/profilepicture")]
+        public async Task<IHttpActionResult> GetProfilePicture()
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null)
+                return NotFound();
+
+            return Ok(new
+            {
+                success = true,
+                profilePictureUrl = user.ProfilePictureUrl
+            });
+        }
+
     }
 }
