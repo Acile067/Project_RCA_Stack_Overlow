@@ -1,15 +1,42 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import React, { useState, useEffect } from "react";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+} from "react-router-dom";
+import Spinner from "./components/Spinner";
+import { checkAndCleanToken } from "./services/authService";
+import { mainRoutes } from "./routes/mainRoutes";
+import { secondaryRoutes } from "./routes/secondaryRoutes";
 
-function App() {
-  const [count, setCount] = useState(0);
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
+      {mainRoutes}
+      {secondaryRoutes}
+    </>
+  )
+);
+
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const preload = async () => {
+      await import("./pages/HomePage");
+      checkAndCleanToken();
+      setIsLoading(false);
+    };
+    preload();
+  }, []);
+
+  if (isLoading) return <Spinner />;
 
   return (
-    <>
-      <h1 className="text-6xl">Test</h1>
-    </>
+    <React.Suspense fallback={<Spinner />}>
+      <RouterProvider router={router} />
+    </React.Suspense>
   );
-}
+};
 
 export default App;
