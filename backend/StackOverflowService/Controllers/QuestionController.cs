@@ -49,5 +49,13 @@ namespace StackOverflowService.Controllers
             else
                 return Content(HttpStatusCode.BadRequest, result);
         }
+        [Authorize]
+        [HttpGet]
+        [Route("api/questions/get-all")]
+        public async Task<IHttpActionResult> GetAll()
+        {
+            var ret = await _questionService.GetQuestionsAsync();
+            return Ok(ret);
+        }
     }
 }

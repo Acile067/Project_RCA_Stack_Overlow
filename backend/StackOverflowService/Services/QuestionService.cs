@@ -1,4 +1,5 @@
 ﻿using Microsoft.Ajax.Utilities;
+using StackOverflowService.AzureStorage;
 using StackOverflowService.DTOs;
 using StackOverflowService.Entities;
 using StackOverflowService.Repositories;
@@ -63,6 +64,10 @@ namespace StackOverflowService.Services
                 Success = true,
                 Errors = new List<FieldError>()
             };
+        }
+        public async Task<List<QuestionTableEntity>> GetQuestionsAsync()
+        {
+            return await _questionRepository.GetAllQuestionsAsync();
         }
     }
 }
