@@ -14,12 +14,13 @@ namespace StackOverflowService.Repositories
     public class QuestionRepository
     {
         private readonly CloudTable _table;
+        private readonly CloudTableClient _tableClient;  // <-- dodaj ovo
 
         public QuestionRepository()
         {
             var storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
-            var client = new CloudTableClient(new Uri(storageAccount.TableEndpoint.AbsoluteUri), storageAccount.Credentials);
-            _table = client.GetTableReference("Question");
+            _tableClient = storageAccount.CreateCloudTableClient();  // <-- ovako kreiramo klienta za tabele
+            _table = _tableClient.GetTableReference("Question");
             _table.CreateIfNotExists();
         }
 
@@ -80,6 +81,78 @@ namespace StackOverflowService.Repositories
 
             var segment = await _table.ExecuteQuerySegmentedAsync(query, null);
             return segment.Results.FirstOrDefault();
+        }
+
+        public async Task UpdateQuestionAsync(QuestionTableEntity updatedEntity)
+        {
+            var operation = TableOperation.Replace(updatedEntity);
+            await _table.ExecuteAsync(operation);
+        }
+
+        public async Task DeleteQuestionAsync(QuestionTableEntity entity)
+        {
+            var operation = TableOperation.Delete(entity);
+            await _table.ExecuteAsync(operation);
+        }
+
+        public async Task DeleteAnswersAndVotesForQuestionAsync(string questionId)
+        {
+            var answerTable = _tableClient.GetTableReference("Answer");
+            var voteTable = _tableClient.GetTableReference("Vote");
+
+            await answerTable.CreateIfNotExistsAsync();
+            await voteTable.CreateIfNotExistsAsync();
+
+            var answerPartitionKey = $"Answer_{questionId}";
+            var answerQuery = new TableQuery<AnswerTableEntity>().Where(
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, answerPartitionKey));
+
+            TableContinuationToken token = null;
+            do
+            {
+                var segment = await answerTable.ExecuteQuerySegmentedAsync(answerQuery, token);
+                token = segment.ContinuationToken;
+
+                foreach (var answer in segment.Results)
+                {
+                    var votePartitionKey = $"Vote_{answer.RowKey}";
+                    var voteQuery = new TableQuery<VoteTableEntity>().Where(
+                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, votePartitionKey));
+
+                    TableContinuationToken voteToken = null;
+                    do
+                    {
+                        var voteSegment = await voteTable.ExecuteQuerySegmentedAsync(voteQuery, voteToken);
+                        voteToken = voteSegment.ContinuationToken;
+
+                        foreach (var vote in voteSegment.Results)
+                        {
+                            var deleteVoteOp = TableOperation.Delete(vote);
+                            await voteTable.ExecuteAsync(deleteVoteOp);
+                        }
+                    } while (voteToken != null);
+
+                    var deleteAnswerOp = TableOperation.Delete(answer);
+                    await answerTable.ExecuteAsync(deleteAnswerOp);
+                }
+            } while (token != null);
+        }
+        public async Task<List<QuestionTableEntity>> GetQuestionsByEmailAsync(string email)
+        {
+            string filter = TableQuery.GenerateFilterCondition("CreatedBy", QueryComparisons.Equal, email);
+            var query = new TableQuery<QuestionTableEntity>().Where(filter);
+
+            TableContinuationToken token = null;
+            var results = new List<QuestionTableEntity>();
+
+            do
+            {
+                var segment = await _table.ExecuteQuerySegmentedAsync(query, token);
+                token = segment.ContinuationToken;
+                results.AddRange(segment.Results);
+            } while (token != null);
+
+            return results;
         }
     }
 }

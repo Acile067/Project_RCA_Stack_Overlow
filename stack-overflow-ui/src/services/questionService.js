@@ -41,3 +41,46 @@ export const getQuestionById = async (id) => {
   if (!res.ok) return null;
   return await res.json();
 };
+
+export const getMyQuestions = async () => {
+  const res = await fetch(`${API_URL}/questions/my-questions`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  if (!res.ok) return [];
+  return await res.json();
+};
+
+export const deleteQuestion = async (id) => {
+  const res = await fetch(`${API_URL}/questions/delete/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  return res.ok;
+};
+
+export const updateQuestion = async (id, data) => {
+  const formData = new FormData();
+  formData.append("title", data.title);
+  formData.append("description", data.description);
+  if (data.questionImage) {
+    formData.append("questionImage", data.questionImage);
+  }
+
+  const res = await fetch(`${API_URL}/questions/edit/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    return { success: false, errors: errorData.errors || [] };
+  }
+  return { success: true };
+};

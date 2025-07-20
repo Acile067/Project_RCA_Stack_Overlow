@@ -71,5 +71,65 @@ namespace StackOverflowService.Controllers
 
             return Ok(question);
         }
+        [Authorize]
+        [HttpPut]
+        [Route("api/questions/edit/{id}")]
+        public async Task<IHttpActionResult> Edit(string id)
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Invalid ID.");
+
+            var dto = new UpdateQuestionDto()
+            {
+                Title = HttpContext.Current.Request.Form["title"],
+                Description = HttpContext.Current.Request.Form["description"],
+                QuestionImage = HttpContext.Current.Request.Files["questionImage"],
+            };
+
+            var result = await _questionService.UpdateQuestionAsync(id, dto, email);
+
+            if (result.Success)
+                return Ok("Question updated successfully.");
+            else
+                return Content(HttpStatusCode.BadRequest, result);
+        }
+
+        [Authorize]
+        [HttpDelete]
+        [Route("api/questions/delete/{id}")]
+        public async Task<IHttpActionResult> Delete(string id)
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Invalid ID.");
+
+            var success = await _questionService.DeleteQuestionAsync(id, email);
+            if (success)
+                return Ok("Question deleted successfully.");
+            else
+                return NotFound();
+        }
+        [Authorize]
+        [HttpGet]
+        [Route("api/questions/my-questions")]
+        public async Task<IHttpActionResult> GetMyQuestions()
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            var questions = await _questionService.GetQuestionsByUserEmailAsync(email);
+            return Ok(questions);
+        }
     }
 }

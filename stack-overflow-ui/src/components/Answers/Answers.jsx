@@ -4,11 +4,11 @@ import {
   getAnswersByQuestionId,
   createAnswer,
 } from "../../services/answerService";
-import { getQuestionById } from "../../services/questionService"; // <-- dodaj ovo
+import { getQuestionById } from "../../services/questionService";
 
 const Answers = () => {
   const { id } = useParams();
-  const [question, setQuestion] = useState(null); // <-- novo
+  const [question, setQuestion] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);

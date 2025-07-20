@@ -288,6 +288,7 @@
     <Compile Include="DTOs\CreateUserDto.cs" />
     <Compile Include="DTOs\LoginDto.cs" />
     <Compile Include="DTOs\QuestionDto.cs" />
+    <Compile Include="DTOs\UpdateQuestionDto.cs" />
     <Compile Include="DTOs\UpdateUserDto.cs" />
     <Compile Include="DTOs\UserProfileDto.cs" />
     <Compile Include="DTOs\ValidationResponseDto.cs" />

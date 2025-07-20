@@ -35,6 +35,12 @@ namespace StackOverflowService.Repositories
             await blob.UploadFromStreamAsync(file.InputStream);
             return blob.Uri.ToString();
         }
+        public async Task DeleteFileAsync(string fileUrl)
+        {
+            var blobName = new Uri(fileUrl).Segments.Last();
+            var blob = _container.GetBlockBlobReference(blobName);
+            await blob.DeleteIfExistsAsync();
+        }
 
     }
 }

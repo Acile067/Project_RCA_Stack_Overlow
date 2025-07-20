@@ -103,5 +103,73 @@ namespace StackOverflowService.Services
                 UpdatedAt = entity.UpdatedAt
             };
         }
+        public async Task<ValidationResponseDto> UpdateQuestionAsync(string id, UpdateQuestionDto dto, string email)
+        {
+            var questionEntity = await _questionRepository.GetQuestionByIdAsync(id);
+            if (questionEntity == null)
+            {
+                return new ValidationResponseDto { Success = false, Errors = new List<FieldError> { new FieldError { Field = "id", Message = "Question not found." } } };
+            }
+
+            if(questionEntity.CreatedBy != email)
+            {
+                return new ValidationResponseDto { Success = false, Errors = new List<FieldError> { new FieldError { Field = "email", Message = "not Authorize." } } };
+            }
+
+            var errors = new List<FieldError>();
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                errors.Add(new FieldError { Field = "title", Message = "Title is required." });
+            if (string.IsNullOrWhiteSpace(dto.Description))
+                errors.Add(new FieldError { Field = "description", Message = "Description is required." });
+
+            if (errors.Any())
+            {
+                return new ValidationResponseDto { Success = false, Errors = errors };
+            }
+
+            if (dto.QuestionImage != null)
+            {
+                if (!string.IsNullOrEmpty(questionEntity.PictureUrl))
+                {
+                    await _pictureBlobService.DeleteFileAsync(questionEntity.PictureUrl);
+                }
+                var newPictureUrl = await _pictureBlobService.UploadFileAsync(dto.QuestionImage);
+                questionEntity.PictureUrl = newPictureUrl;
+            }
+
+            questionEntity.Title = dto.Title;
+            questionEntity.Description = dto.Description;
+            questionEntity.UpdatedAt = DateTime.UtcNow;
+
+            await _questionRepository.UpdateQuestionAsync(questionEntity);
+
+            return new ValidationResponseDto { Success = true, Errors = new List<FieldError>() };
+        }
+
+        public async Task<bool> DeleteQuestionAsync(string id, string email)
+        {
+            var questionEntity = await _questionRepository.GetQuestionByIdAsync(id);
+            if (questionEntity == null)
+                return false;
+
+            if(questionEntity.CreatedBy != email)
+                return false;
+
+            if (!string.IsNullOrEmpty(questionEntity.PictureUrl))
+            {
+                await _pictureBlobService.DeleteFileAsync(questionEntity.PictureUrl);
+            }
+
+            await _questionRepository.DeleteAnswersAndVotesForQuestionAsync(id);
+
+            await _questionRepository.DeleteQuestionAsync(questionEntity);
+
+            return true;
+        }
+        public async Task<List<QuestionDto>> GetQuestionsByUserEmailAsync(string email)
+        {
+            var entities = await _questionRepository.GetQuestionsByEmailAsync(email);
+            return entities.Select(MapToDto).ToList();
+        }
     }
 }
