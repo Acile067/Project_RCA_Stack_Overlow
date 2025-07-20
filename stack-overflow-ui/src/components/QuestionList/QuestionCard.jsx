@@ -1,18 +1,26 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const QuestionCard = ({ question }) => {
   return (
     <div className="border p-4 rounded shadow-md bg-white">
       <h2 className="text-xl font-semibold">{question.Title}</h2>
       <p className="mt-1 text-gray-700">{question.Description}</p>
+
       {question.PictureUrl && (
         <img
           src={question.PictureUrl}
           alt="Question"
-          className="mt-2 w-full max-h-64 object-cover"
+          className="mt-2 w-full max-h-64 object-cover rounded"
         />
       )}
-      <button className="mt-4 text-blue-600 hover:underline">Answer</button>
+
+      <Link
+        to={`/question/${question.Id}/answers`}
+        className="mt-4 inline-block text-blue-600 hover:underline"
+      >
+        Answers
+      </Link>
     </div>
   );
 };

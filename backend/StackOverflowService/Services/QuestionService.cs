@@ -65,9 +65,43 @@ namespace StackOverflowService.Services
                 Errors = new List<FieldError>()
             };
         }
-        public async Task<List<QuestionTableEntity>> GetQuestionsAsync()
+        public async Task<List<QuestionDto>> GetAllAsync()
         {
-            return await _questionRepository.GetAllQuestionsAsync();
+            var questions = await _questionRepository.GetAllQuestionsAsync();
+            return questions.Select(MapToDto).ToList();
+        }
+        private QuestionDto MapToDto(QuestionTableEntity entity)
+        {
+            return new QuestionDto
+            {
+                Id = entity.RowKey,
+                Title = entity.Title,
+                Description = entity.Description,
+                PictureUrl = entity.PictureUrl,
+                CreatedBy = entity.CreatedBy,
+                TopAnswerId = entity.TopAnswerId,
+                IsClosed = entity.IsClosed,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
+            };
+        }
+        public async Task<QuestionDto> GetQuestionByIdAsync(string id)
+        {
+            var entity = await _questionRepository.GetQuestionByIdAsync(id);
+            if (entity == null) return null;
+
+            return new QuestionDto
+            {
+                Id = entity.RowKey,
+                Title = entity.Title,
+                Description = entity.Description,
+                PictureUrl = entity.PictureUrl,
+                CreatedBy = entity.CreatedBy,
+                TopAnswerId = entity.TopAnswerId,
+                IsClosed = entity.IsClosed,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
+            };
         }
     }
 }

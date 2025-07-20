@@ -25,9 +25,6 @@ namespace StackOverflowService.Repositories
 
         public async Task SaveAnswerAsync(Answer answer)
         {
-            answer.Id = Guid.NewGuid().ToString();
-            answer.CreatedAt = DateTime.UtcNow;
-
             var entity = new AnswerTableEntity(answer);
             var insert = TableOperation.Insert(entity);
             await _table.ExecuteAsync(insert);

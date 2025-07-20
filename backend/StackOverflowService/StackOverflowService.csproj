@@ -278,12 +278,16 @@
     <Compile Include="AzureStorage\QuestionTableEntity.cs" />
     <Compile Include="AzureStorage\UserTableEntity.cs" />
     <Compile Include="AzureStorage\VoteTableEntity.cs" />
+    <Compile Include="Controllers\AnswerController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QuestionController.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="DTOs\AnswerDto.cs" />
+    <Compile Include="DTOs\CreateAnswerDto.cs" />
     <Compile Include="DTOs\CreateQuestionDto.cs" />
     <Compile Include="DTOs\CreateUserDto.cs" />
     <Compile Include="DTOs\LoginDto.cs" />
+    <Compile Include="DTOs\QuestionDto.cs" />
     <Compile Include="DTOs\UpdateUserDto.cs" />
     <Compile Include="DTOs\UserProfileDto.cs" />
     <Compile Include="DTOs\ValidationResponseDto.cs" />
@@ -301,6 +305,7 @@
     <Compile Include="Repositories\QuestionRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Repositories\VoteRepository.cs" />
+    <Compile Include="Services\AnswerService.cs" />
     <Compile Include="Services\QuestionService.cs" />
     <Compile Include="Services\UserService.cs" />
     <Compile Include="Startup.cs" />

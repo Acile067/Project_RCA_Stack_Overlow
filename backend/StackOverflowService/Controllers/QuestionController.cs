@@ -52,10 +52,24 @@ namespace StackOverflowService.Controllers
         [Authorize]
         [HttpGet]
         [Route("api/questions/get-all")]
-        public async Task<IHttpActionResult> GetAll()
+        public async Task<IHttpActionResult> GetAllAsync()
         {
-            var ret = await _questionService.GetQuestionsAsync();
+            var ret = await _questionService.GetAllAsync();
             return Ok(ret);
+        }
+        [Authorize]
+        [HttpGet]
+        [Route("api/questions/{id}")]
+        public async Task<IHttpActionResult> GetByIdAsync(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Invalid ID.");
+
+            var question = await _questionService.GetQuestionByIdAsync(id);
+            if (question == null)
+                return NotFound();
+
+            return Ok(question);
         }
     }
 }

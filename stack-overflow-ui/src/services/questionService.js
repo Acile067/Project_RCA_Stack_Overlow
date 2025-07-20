@@ -30,3 +30,14 @@ export const createQuestion = async (data) => {
 
   return res.ok;
 };
+
+export const getQuestionById = async (id) => {
+  const res = await fetch(`${API_URL}/questions/${id}`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+
+  if (!res.ok) return null;
+  return await res.json();
+};

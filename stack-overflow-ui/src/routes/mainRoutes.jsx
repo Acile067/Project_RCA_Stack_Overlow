@@ -4,6 +4,7 @@ import MainLayout from "../layouts/MainLayout";
 import PrivateRoute from "../components/Route/PrivateRoute";
 const HomePage = React.lazy(() => import("../pages/HomePage"));
 const SettingsPage = React.lazy(() => import("../pages/SettingsPage"));
+const AnswersPage = React.lazy(() => import("../pages/AnswersPage"));
 
 export const mainRoutes = (
   <Route path="/" element={<MainLayout />}>
@@ -13,6 +14,14 @@ export const mainRoutes = (
       element={
         <PrivateRoute>
           <SettingsPage />
+        </PrivateRoute>
+      }
+    />
+    <Route
+      path="question/:id/answers"
+      element={
+        <PrivateRoute>
+          <AnswersPage />
         </PrivateRoute>
       }
     />

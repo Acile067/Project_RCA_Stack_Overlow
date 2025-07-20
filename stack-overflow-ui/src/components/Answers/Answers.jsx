@@ -1,0 +1,142 @@
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  getAnswersByQuestionId,
+  createAnswer,
+} from "../../services/answerService";
+import { getQuestionById } from "../../services/questionService"; // <-- dodaj ovo
+
+const Answers = () => {
+  const { id } = useParams();
+  const [question, setQuestion] = useState(null); // <-- novo
+  const [answers, setAnswers] = useState([]);
+  const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [newAnswer, setNewAnswer] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchAnswers = async () => {
+    try {
+      const data = await getAnswersByQuestionId(id);
+      const camelCased = data.map((a) => ({
+        id: a.Id,
+        questionId: a.QuestionId,
+        description: a.Description,
+        numberOfVotes: a.NumberOfVotes,
+        authorEmail: a.AnsweredByEmail,
+        createdAt: a.CreatedAt,
+      }));
+      const sorted = camelCased.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setAnswers(sorted);
+    } catch (err) {
+      setError("Failed to load answers.");
+    }
+  };
+
+  const fetchQuestion = async () => {
+    try {
+      const q = await getQuestionById(id);
+      if (q) {
+        setQuestion({
+          id: q.Id,
+          title: q.Title,
+          description: q.Description,
+          pictureUrl: q.PictureUrl,
+          createdBy: q.CreatedBy,
+          topAnswerId: q.TopAnswerId,
+          isClosed: q.IsClosed,
+          createdAt: q.CreatedAt,
+          updatedAt: q.UpdatedAt,
+        });
+      }
+    } catch (err) {
+      setError("Failed to load question.");
+    }
+  };
+
+  useEffect(() => {
+    fetchQuestion();
+    fetchAnswers();
+  }, [id]);
+
+  const handleAnswerClick = () => {
+    setShowForm(!showForm);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!newAnswer.trim()) return;
+
+    setSubmitting(true);
+    try {
+      await createAnswer({ questionId: id, description: newAnswer });
+      setNewAnswer("");
+      setShowForm(false);
+      fetchAnswers();
+    } catch (err) {
+      setError("Failed to submit answer.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="mt-36 max-w-2xl mx-auto">
+      {error && <p className="text-red-500">{error}</p>}
+
+      {question && (
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">{question.title}</h1>
+          <p className="mb-4 text-gray-700">{question.description}</p>
+          {question.pictureUrl && (
+            <img
+              src={question.pictureUrl}
+              alt="Question"
+              className="rounded w-full max-h-96 object-contain mb-6"
+            />
+          )}
+        </div>
+      )}
+
+      <button
+        onClick={handleAnswerClick}
+        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        {showForm ? "Cancel" : "Answer"}
+      </button>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="mb-6">
+          <textarea
+            className="w-full p-2 border rounded mb-2"
+            rows="4"
+            placeholder="Write your answer..."
+            value={newAnswer}
+            onChange={(e) => setNewAnswer(e.target.value)}
+          ></textarea>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            {submitting ? "Submitting..." : "Submit"}
+          </button>
+        </form>
+      )}
+
+      {answers.map((answer) => (
+        <div key={answer.id} className="mb-4 p-4 border rounded shadow">
+          <p>{answer.description}</p>
+          <p className="text-sm text-gray-500">By: {answer.authorEmail}</p>
+          <p className="text-xs text-gray-400">
+            {new Date(answer.createdAt).toLocaleString()}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Answers;
