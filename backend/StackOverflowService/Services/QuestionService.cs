@@ -171,5 +171,17 @@ namespace StackOverflowService.Services
             var entities = await _questionRepository.GetQuestionsByEmailAsync(email);
             return entities.Select(MapToDto).ToList();
         }
+        public async Task<List<QuestionDto>> SearchQuestionsAsync(string title, DateTime? from, DateTime? to)
+        {
+            var allQuestions = await _questionRepository.GetAllQuestionsAsync();
+
+            var filtered = allQuestions.Where(q =>
+                (string.IsNullOrWhiteSpace(title) || q.Title.ToLower().Contains(title.ToLower())) &&
+                (!from.HasValue || q.CreatedAt >= from.Value) &&
+                (!to.HasValue || q.CreatedAt <= to.Value)
+            );
+
+            return filtered.Select(MapToDto).ToList();
+        }
     }
 }

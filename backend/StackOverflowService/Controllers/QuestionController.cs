@@ -131,5 +131,13 @@ namespace StackOverflowService.Controllers
             var questions = await _questionService.GetQuestionsByUserEmailAsync(email);
             return Ok(questions);
         }
+        [Authorize]
+        [HttpGet]
+        [Route("api/questions/search")]
+        public async Task<IHttpActionResult> Search([FromUri] string title = "", [FromUri] DateTime? from = null, [FromUri] DateTime? to = null)
+        {
+            var results = await _questionService.SearchQuestionsAsync(title, from, to);
+            return Ok(results);
+        }
     }
 }

@@ -4,6 +4,7 @@ import {
   createQuestion,
 } from "../../services/questionService";
 import QuestionCard from "./QuestionCard";
+import { getToken } from "../../services/authService";
 
 const QuestionList = () => {
   const [questions, setQuestions] = useState([]);
@@ -15,6 +16,9 @@ const QuestionList = () => {
   });
   const [preview, setPreview] = useState(null);
   const [errors, setErrors] = useState({});
+  const [searchTitle, setSearchTitle] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     fetchQuestions();
@@ -28,6 +32,24 @@ const QuestionList = () => {
   const handleToggleForm = () => {
     setShowForm(!showForm);
     setErrors({});
+  };
+
+  const searchQuestions = async () => {
+    let url = `${import.meta.env.VITE_BACKEND_API_URL}/questions/search?`;
+    if (searchTitle) url += `title=${encodeURIComponent(searchTitle)}&`;
+    if (fromDate) url += `from=${fromDate}&`;
+    if (toDate) url += `to=${toDate}&`;
+
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setQuestions(data);
+    }
   };
 
   const handleChange = (e) => {
@@ -152,6 +174,34 @@ const QuestionList = () => {
           )}
         </form>
       )}
+
+      <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-4">
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={searchTitle}
+          onChange={(e) => setSearchTitle(e.target.value)}
+          className="border px-3 py-2 rounded w-full sm:w-1/3"
+        />
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="border px-3 py-2 rounded"
+        />
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          className="border px-3 py-2 rounded"
+        />
+        <button
+          onClick={searchQuestions}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Search
+        </button>
+      </div>
 
       <div className="mt-6 space-y-6">
         {questions.map((q) => (

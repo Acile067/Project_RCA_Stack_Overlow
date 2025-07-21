@@ -25,6 +25,7 @@ const Answers = () => {
   const [newAnswer, setNewAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [votedAnswers, setVotedAnswers] = useState({});
+  const [sortByVotes, setSortByVotes] = useState(null);
 
   const checkVotes = async (answers) => {
     const results = {};
@@ -58,9 +59,16 @@ const Answers = () => {
         authorEmail: a.AnsweredByEmail,
         createdAt: a.CreatedAt,
       }));
-      const sorted = camelCased.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
+      let sorted = [...camelCased];
+
+      if (sortByVotes === "asc") {
+        sorted.sort((a, b) => a.numberOfVotes - b.numberOfVotes);
+      } else if (sortByVotes === "desc") {
+        sorted.sort((a, b) => b.numberOfVotes - a.numberOfVotes);
+      } else {
+        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+
       setAnswers(sorted);
       await checkVotes(sorted);
     } catch (err) {
@@ -93,6 +101,10 @@ const Answers = () => {
     fetchQuestion();
     fetchAnswers();
   }, [id]);
+
+  useEffect(() => {
+    fetchAnswers();
+  }, [sortByVotes]);
 
   const handleAnswerClick = () => {
     setShowForm(!showForm);
@@ -158,6 +170,20 @@ const Answers = () => {
           </button>
         </form>
       )}
+
+      {/* Sort Dropdown */}
+      <div className="mb-4 flex gap-4 items-center">
+        <label className="text-gray-700">Sort by votes:</label>
+        <select
+          value={sortByVotes || ""}
+          onChange={(e) => setSortByVotes(e.target.value || null)}
+          className="border px-3 py-1 rounded"
+        >
+          <option value="">Newest</option>
+          <option value="asc">Least votes</option>
+          <option value="desc">Most votes</option>
+        </select>
+      </div>
 
       {answers.map((answer) => (
         <div
