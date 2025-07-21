@@ -6,6 +6,16 @@ import {
 } from "../../services/answerService";
 import { getQuestionById } from "../../services/questionService";
 
+import {
+  voteForAnswer,
+  unvoteAnswer,
+  hasUserVoted,
+} from "../../services/voteService";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart as solidHeart } from "@fortawesome/free-solid-svg-icons";
+import { faHeart as regularHeart } from "@fortawesome/free-regular-svg-icons";
+
 const Answers = () => {
   const { id } = useParams();
   const [question, setQuestion] = useState(null);
@@ -14,6 +24,28 @@ const Answers = () => {
   const [showForm, setShowForm] = useState(false);
   const [newAnswer, setNewAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [votedAnswers, setVotedAnswers] = useState({});
+
+  const checkVotes = async (answers) => {
+    const results = {};
+    for (const answer of answers) {
+      const voted = await hasUserVoted(answer.id);
+      results[answer.id] = voted;
+    }
+    setVotedAnswers(results);
+  };
+
+  const handleVoteToggle = async (answerId) => {
+    const alreadyVoted = votedAnswers[answerId];
+
+    const success = alreadyVoted
+      ? await unvoteAnswer(answerId)
+      : await voteForAnswer(answerId);
+
+    if (success) {
+      fetchAnswers(); // refresh votes
+    }
+  };
 
   const fetchAnswers = async () => {
     try {
@@ -30,6 +62,7 @@ const Answers = () => {
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
       setAnswers(sorted);
+      await checkVotes(sorted);
     } catch (err) {
       setError("Failed to load answers.");
     }
@@ -127,12 +160,32 @@ const Answers = () => {
       )}
 
       {answers.map((answer) => (
-        <div key={answer.id} className="mb-4 p-4 border rounded shadow">
-          <p>{answer.description}</p>
-          <p className="text-sm text-gray-500">By: {answer.authorEmail}</p>
-          <p className="text-xs text-gray-400">
-            {new Date(answer.createdAt).toLocaleString()}
-          </p>
+        <div
+          key={answer.id}
+          className="mb-4 p-4 border rounded shadow flex justify-between items-start"
+        >
+          <div>
+            <p>{answer.description}</p>
+            <p className="text-sm text-gray-500">By: {answer.authorEmail}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(answer.createdAt).toLocaleString()}
+            </p>
+          </div>
+          <div className="flex flex-col items-center ml-4">
+            <button
+              onClick={() => handleVoteToggle(answer.id)}
+              className="hover:text-red-600"
+              title={votedAnswers[answer.id] ? "Unvote" : "Upvote"}
+            >
+              <FontAwesomeIcon
+                icon={votedAnswers[answer.id] ? solidHeart : regularHeart}
+                className={`text-2xl transition-colors ${
+                  votedAnswers[answer.id] ? "text-red-500" : "text-gray-500"
+                }`}
+              />
+            </button>
+            <span className="text-sm mt-1">{answer.numberOfVotes}</span>
+          </div>
         </div>
       ))}
     </div>

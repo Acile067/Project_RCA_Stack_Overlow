@@ -282,10 +282,12 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QuestionController.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Controllers\VoteController.cs" />
     <Compile Include="DTOs\AnswerDto.cs" />
     <Compile Include="DTOs\CreateAnswerDto.cs" />
     <Compile Include="DTOs\CreateQuestionDto.cs" />
     <Compile Include="DTOs\CreateUserDto.cs" />
+    <Compile Include="DTOs\CreateVoteDto.cs" />
     <Compile Include="DTOs\LoginDto.cs" />
     <Compile Include="DTOs\QuestionDto.cs" />
     <Compile Include="DTOs\UpdateQuestionDto.cs" />
@@ -309,6 +311,7 @@
     <Compile Include="Services\AnswerService.cs" />
     <Compile Include="Services\QuestionService.cs" />
     <Compile Include="Services\UserService.cs" />
+    <Compile Include="Services\VoteService.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="WebRole.cs" />
   </ItemGroup>

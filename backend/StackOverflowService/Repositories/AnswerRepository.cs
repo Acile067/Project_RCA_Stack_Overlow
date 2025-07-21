@@ -37,5 +37,18 @@ namespace StackOverflowService.Repositories
             var segment = await _table.ExecuteQuerySegmentedAsync(query, null);
             return segment.Results;
         }
+        public async Task<AnswerTableEntity> GetAnswerByIdAsync(string answerId)
+        {
+            var filter = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, answerId);
+            var query = new TableQuery<AnswerTableEntity>().Where(filter);
+            var segment = await _table.ExecuteQuerySegmentedAsync(query, null);
+            return segment.Results.FirstOrDefault();
+        }
+        public async Task UpdateAnswerAsync(AnswerTableEntity updatedEntity)
+        {
+            updatedEntity.ETag = "*";
+            var operation = TableOperation.Replace(updatedEntity);
+            await _table.ExecuteAsync(operation);
+        }
     }
 }

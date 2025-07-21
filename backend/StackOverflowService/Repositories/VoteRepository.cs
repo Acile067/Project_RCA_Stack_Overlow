@@ -29,14 +29,29 @@ namespace StackOverflowService.Repositories
             return result.Result != null;
         }
 
-        public async Task SaveVoteAsync(string answerId, string userEmail)
+        public async Task<bool> SaveVoteAsync(string answerId, string userEmail)
         {
             if (await HasUserAlreadyVotedAsync(answerId, userEmail))
-                return;
+                return false;
 
             var vote = new VoteTableEntity(answerId, userEmail);
             var insert = TableOperation.Insert(vote);
             await _table.ExecuteAsync(insert);
+            return true;
+        }
+        public async Task<bool> DeleteVoteAsync(string answerId, string userEmail)
+        {
+            var retrieve = TableOperation.Retrieve<VoteTableEntity>($"Vote_{answerId}", userEmail);
+            var result = await _table.ExecuteAsync(retrieve);
+
+            if (result.Result is VoteTableEntity voteEntity)
+            {
+                var delete = TableOperation.Delete(voteEntity);
+                await _table.ExecuteAsync(delete);
+                return true;
+            }
+
+            return false;
         }
     }
 }
