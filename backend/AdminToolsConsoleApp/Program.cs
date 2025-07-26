@@ -17,12 +17,12 @@ namespace AdminToolsConsoleApp
             while (!exit)
             {
                 Console.WriteLine("\n=== Admin Tools Console ===");
-                Console.WriteLine("1. Prikazi sve email adrese");
-                Console.WriteLine("2. Dodaj novu email adresu");
-                Console.WriteLine("3. Obrisi email adresu");
-                Console.WriteLine("4. Izlaz");
+                Console.WriteLine("1. Show all email addresses");
+                Console.WriteLine("2. Add new email address");
+                Console.WriteLine("3. Delete email address");
+                Console.WriteLine("4. Exit");
 
-                Console.Write("\nUnesi opciju: ");
+                Console.Write("\nChoose an option: ");
                 string choice = Console.ReadLine();
 
                 switch (choice)
@@ -40,7 +40,7 @@ namespace AdminToolsConsoleApp
                         exit = true;
                         break;
                     default:
-                        Console.WriteLine("Nepoznata opcija.");
+                        Console.WriteLine("Invalid input.");
                         break;
                 }
             }

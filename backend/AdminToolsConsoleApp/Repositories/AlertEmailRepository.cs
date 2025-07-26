@@ -24,6 +24,18 @@ namespace AdminToolsConsoleApp.Repositories
             _table.CreateIfNotExistsAsync().Wait();
         }
 
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            var query = new TableQuery<AlertEmailEntity>().Where(
+                TableQuery.GenerateFilterCondition("EmailAddress", QueryComparisons.Equal, email)
+            );
+
+            var token = new TableContinuationToken();
+            var segment = await _table.ExecuteQuerySegmentedAsync(query, token);
+
+            return segment.Results.Any(); // true ako postoji korisnik sa tim emailom
+        }
+
         public async Task<List<string>> GetAllEmailsAsync()
         {
             var query = new TableQuery<AlertEmailEntity>().Where(
