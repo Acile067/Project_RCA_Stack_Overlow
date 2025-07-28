@@ -1,6 +1,9 @@
+using HealthMonitoringService.HelperMethods;
+using HealthMonitoringService.Repositories;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.Storage.Queue;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,57 +19,55 @@ namespace HealthMonitoringService
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
 
+        private AlertEmailRepository alertRepo;
+        private HealthCheckRepository checkRepo;
+        private CloudQueue queue;
+
+        public override bool OnStart()
+        {
+            ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+            ServicePointManager.DefaultConnectionLimit = 12;
+
+            alertRepo = new AlertEmailRepository();
+            checkRepo = new HealthCheckRepository();
+            queue = QueueHelper.GetQueueReference("emails");
+
+            Trace.TraceInformation("HealthMonitoringService has been started");
+            return base.OnStart();
+        }
+
         public override void Run()
         {
             Trace.TraceInformation("HealthMonitoringService is running");
 
             try
             {
-                this.RunAsync(this.cancellationTokenSource.Token).Wait();
+                RunAsync(cancellationTokenSource.Token).Wait();
             }
             finally
             {
-                this.runCompleteEvent.Set();
+                runCompleteEvent.Set();
             }
-        }
-
-        public override bool OnStart()
-        {
-            // Use TLS 1.2 for Service Bus connections
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            // Set the maximum number of concurrent connections
-            ServicePointManager.DefaultConnectionLimit = 12;
-
-            // For information on handling configuration changes
-            // see the MSDN topic at https://go.microsoft.com/fwlink/?LinkId=166357.
-
-            bool result = base.OnStart();
-
-            Trace.TraceInformation("HealthMonitoringService has been started");
-
-            return result;
         }
 
         public override void OnStop()
         {
             Trace.TraceInformation("HealthMonitoringService is stopping");
-
-            this.cancellationTokenSource.Cancel();
-            this.runCompleteEvent.WaitOne();
-
+            cancellationTokenSource.Cancel();
+            runCompleteEvent.WaitOne();
             base.OnStop();
-
             Trace.TraceInformation("HealthMonitoringService has stopped");
         }
 
-        private async Task RunAsync(CancellationToken cancellationToken)
+        private async Task RunAsync(CancellationToken token)
         {
-            // TODO: Replace the following with your own logic.
-            while (!cancellationToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
-                Trace.TraceInformation("Working");
-                await Task.Delay(1000);
+                var stackOverflowCheck = HealthCheckHelper.CheckStackOverflowServiceAsync(checkRepo, alertRepo, queue);
+                var notificationCheck = HealthCheckHelper.CheckNotificationServiceAsync(checkRepo, alertRepo, queue);
+
+                await Task.WhenAll(stackOverflowCheck, notificationCheck);
+                await Task.Delay(4000, token);
             }
         }
     }
