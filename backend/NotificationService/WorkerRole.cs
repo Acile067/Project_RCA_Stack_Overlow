@@ -1,6 +1,7 @@
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using NotificationService.Servers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,6 +16,8 @@ namespace NotificationService
     {
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
+        
+        private NotificationsServer NotificationsServer { get; set; }
 
         public override void Run()
         {
@@ -43,6 +46,9 @@ namespace NotificationService
 
             bool result = base.OnStart();
 
+            NotificationsServer = new NotificationsServer();
+            NotificationsServer.Open();
+
             Trace.TraceInformation("NotificationService has been started");
 
             return result;
@@ -56,6 +62,7 @@ namespace NotificationService
             this.runCompleteEvent.WaitOne();
 
             base.OnStop();
+            NotificationsServer.Close();
 
             Trace.TraceInformation("NotificationService has stopped");
         }

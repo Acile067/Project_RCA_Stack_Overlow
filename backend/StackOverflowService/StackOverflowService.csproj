@@ -279,6 +279,7 @@
     <Compile Include="AzureStorage\UserTableEntity.cs" />
     <Compile Include="AzureStorage\VoteTableEntity.cs" />
     <Compile Include="Controllers\AnswerController.cs" />
+    <Compile Include="Controllers\HealthMonitoringController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\QuestionController.cs" />
     <Compile Include="Controllers\UserController.cs" />
