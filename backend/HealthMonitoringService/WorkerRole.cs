@@ -32,6 +32,9 @@ namespace HealthMonitoringService
             checkRepo = new HealthCheckRepository();
             queue = QueueHelper.GetQueueReference("emails");
 
+            // Reset IsEmailReceived value to false
+            alertRepo.ResetAllEmailStatusesAsync().Wait();
+
             Trace.TraceInformation("HealthMonitoringService has been started");
             return base.OnStart();
         }
