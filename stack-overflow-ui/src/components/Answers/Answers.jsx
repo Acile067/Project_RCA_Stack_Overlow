@@ -4,13 +4,17 @@ import {
   getAnswersByQuestionId,
   createAnswer,
 } from "../../services/answerService";
-import { getQuestionById } from "../../services/questionService";
+import { getQuestionById, closeQuestion } from "../../services/questionService";
+import { getUserEmailFromToken } from "../../services/authService";
 
 import {
   voteForAnswer,
   unvoteAnswer,
   hasUserVoted,
 } from "../../services/voteService";
+
+import {faStar as solidStar} from "@fortawesome/free-solid-svg-icons";
+import {faStar as regularStar} from "@fortawesome/free-regular-svg-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as solidHeart } from "@fortawesome/free-solid-svg-icons";
@@ -26,6 +30,8 @@ const Answers = () => {
   const [submitting, setSubmitting] = useState(false);
   const [votedAnswers, setVotedAnswers] = useState({});
   const [sortByVotes, setSortByVotes] = useState(null);
+  const loggedUserEmail = getUserEmailFromToken();
+
 
   const checkVotes = async (answers) => {
     const results = {};
@@ -127,6 +133,13 @@ const Answers = () => {
     }
   };
 
+  const handleCloseQuestion = async (answerId) => {
+  const success = await closeQuestion(question.id, answerId);
+  if (success) {
+    setQuestion({ ...question, isClosed: true, topAnswerId: answerId });
+  }
+};
+
   return (
     <div className="mt-36 max-w-2xl mx-auto">
       {error && <p className="text-red-500">{error}</p>}
@@ -147,7 +160,13 @@ const Answers = () => {
 
       <button
         onClick={handleAnswerClick}
-        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        disabled={question?.isClosed}
+        className={`mb-6 px-4 py-2 text-white rounded ${
+          question?.isClosed
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-blue-600 hover:bg-blue-700"
+        }`}
+        title={question?.isClosed ? "Question is closed" : ""}
       >
         {showForm ? "Cancel" : "Answer"}
       </button>
@@ -186,6 +205,7 @@ const Answers = () => {
       </div>
 
       {answers.map((answer) => (
+        
         <div
           key={answer.id}
           className="mb-4 p-4 border rounded shadow flex justify-between items-start"
@@ -201,6 +221,7 @@ const Answers = () => {
             <button
               onClick={() => handleVoteToggle(answer.id)}
               className="hover:text-red-600"
+              disabled={question?.isClosed}
               title={votedAnswers[answer.id] ? "Unvote" : "Upvote"}
             >
               <FontAwesomeIcon
@@ -211,6 +232,22 @@ const Answers = () => {
               />
             </button>
             <span className="text-sm mt-1">{answer.numberOfVotes}</span>
+
+            {question && question.createdBy === loggedUserEmail && (!question.isClosed ? (
+              <button
+                onClick={() => handleCloseQuestion(answer.id)}
+                className="mt-2 text-gray-500 hover:text-yellow-600 transition-colors"
+                title="Mark as Top Answer & Close Question"
+                >
+                <FontAwesomeIcon icon={regularStar} className="text-xl" />
+              </button>
+                ) : (question.topAnswerId === answer.id &&(
+              <span className="mt-2 text-yellow-500" title="Top Answer">
+                <FontAwesomeIcon icon={solidStar} className="text-xl" />
+              </span>
+                )
+              )
+            )}
           </div>
         </div>
       ))}

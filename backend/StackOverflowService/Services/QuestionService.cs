@@ -183,5 +183,15 @@ namespace StackOverflowService.Services
 
             return filtered.Select(MapToDto).ToList();
         }
+
+        public async Task<bool> CloseQuestionAsync(string questionId, string topAnswerId, string userEmail)
+        {
+            var question = await _questionRepository.GetQuestionByIdAsync(questionId);
+            if (question == null || question.CreatedBy != userEmail || question.IsClosed)
+                return false;
+
+            await _questionRepository.CloseQuestionAsync(questionId, topAnswerId);
+            return true;
+        }
     }
 }

@@ -37,3 +37,14 @@ export const getUserIdFromToken = () => {
     return null;
   }
 };
+
+export const getUserEmailFromToken = () => {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.email || null;
+  } catch {
+    return null;
+  }
+};

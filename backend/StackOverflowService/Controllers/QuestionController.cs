@@ -139,5 +139,26 @@ namespace StackOverflowService.Controllers
             var results = await _questionService.SearchQuestionsAsync(title, from, to);
             return Ok(results);
         }
+
+        [Authorize]
+        [HttpPut]
+        [Route("api/questions/close/{id}")]
+        public async Task<IHttpActionResult> Close(string id, [FromUri] string topAnswerId)
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Invalid ID.");
+
+            var success = await _questionService.CloseQuestionAsync(id, topAnswerId, email);
+            if (success)
+                return Ok("Question closed successfully.");
+            else
+                return Content(HttpStatusCode.Forbidden, "You are not authorized or question already closed.");
+        }
+
     }
 }
