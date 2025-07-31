@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using DotNetEnv;
 using NotificationService.Services;
 using Microsoft.WindowsAzure.Storage.Queue;
-using NotificationService.HelperMethods.cs;
+using NotificationService.HelperMethods;
 
 namespace NotificationService
 {
@@ -86,6 +86,7 @@ namespace NotificationService
                 Trace.TraceInformation("Working");
 
                 await HealthCheckMailService.SendEmailsFromQueueAsync(queue);
+                await CloseQuestionMailService.ProcessTopAnswerQueueAsync();
 
                 await Task.Delay(1000);
             }

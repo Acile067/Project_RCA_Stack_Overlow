@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NotificationService.HelperMethods.cs
+namespace NotificationService.HelperMethods
 {
     public class QueueHelper
     {
