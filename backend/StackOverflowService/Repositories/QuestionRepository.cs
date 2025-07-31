@@ -62,6 +62,7 @@ namespace StackOverflowService.Repositories
                     RowKey = question.RowKey,
                     Title = question.Title,
                     Description = question.Description,
+                    PictureUrl = question.PictureUrl,
                     CreatedBy = question.CreatedBy,
                     TopAnswerId = question.TopAnswerId,
                     IsClosed = question.IsClosed,

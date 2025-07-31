@@ -1,4 +1,6 @@
-﻿using StackOverflowService.DTOs;
+﻿using Microsoft.WindowsAzure.Storage.Queue;
+using StackOverflowService.DTOs;
+using StackOverflowService.HelperMethods;
 using StackOverflowService.Repositories;
 using StackOverflowService.Services;
 using System;
@@ -18,11 +20,13 @@ namespace StackOverflowService.Controllers
     public class QuestionController : ApiController
     {
         private readonly QuestionService _questionService;
+        private CloudQueue queue;
         public QuestionController()
         {
             var questionRepo = new QuestionRepository();
             var blobService = new QuestionPictureBlobService();
             _questionService = new QuestionService(questionRepo, blobService);
+            queue = QueueHelper.GetQueueReference("top-answer-notification");
         }
         [Authorize]
         [HttpPost]
@@ -139,5 +143,30 @@ namespace StackOverflowService.Controllers
             var results = await _questionService.SearchQuestionsAsync(title, from, to);
             return Ok(results);
         }
+
+        [Authorize]
+        [HttpPut]
+        [Route("api/questions/close/{id}")]
+        public async Task<IHttpActionResult> Close(string id, [FromUri] string topAnswerId)
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Invalid ID.");
+
+            var success = await _questionService.CloseQuestionAsync(id, topAnswerId, email);
+            if (success)
+            {
+                
+                await QueueHelper.EnqueueTopAnswerIdAsync(topAnswerId, queue);
+                return Ok("Question closed successfully.");
+            }
+            else
+                return Content(HttpStatusCode.Forbidden, "You are not authorized or question already closed.");
+        }
+
     }
 }

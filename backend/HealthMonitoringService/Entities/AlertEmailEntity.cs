@@ -12,5 +12,6 @@ namespace HealthMonitoringService.Entities
     {
         public AlertEmailEntity() { }
         public string EmailAddress { get; set; }
+        public bool IsEmailReceived { get; set; }
     }
 }

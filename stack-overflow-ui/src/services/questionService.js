@@ -84,3 +84,16 @@ export const updateQuestion = async (id, data) => {
   }
   return { success: true };
 };
+
+export const closeQuestion = async (questionId, topAnswerId) => {
+  const res = await fetch(
+    `${API_URL}/questions/close/${questionId}?topAnswerId=${topAnswerId}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    }
+  );
+  return res.ok;
+};

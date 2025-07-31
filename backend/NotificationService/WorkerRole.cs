@@ -9,6 +9,10 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetEnv;
+using NotificationService.Services;
+using Microsoft.WindowsAzure.Storage.Queue;
+using NotificationService.HelperMethods;
 
 namespace NotificationService
 {
@@ -18,6 +22,7 @@ namespace NotificationService
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
         
         private NotificationsServer NotificationsServer { get; set; }
+        private CloudQueue queue;
 
         public override void Run()
         {
@@ -35,6 +40,10 @@ namespace NotificationService
 
         public override bool OnStart()
         {
+
+            Env.Load();
+            Trace.TraceInformation("MAIL_USERNAME = " + Environment.GetEnvironmentVariable("MAIL_USERNAME"));
+            Trace.TraceInformation("Current directory = " + Environment.CurrentDirectory);
             // Use TLS 1.2 for Service Bus connections
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -43,11 +52,13 @@ namespace NotificationService
 
             // For information on handling configuration changes
             // see the MSDN topic at https://go.microsoft.com/fwlink/?LinkId=166357.
+            
+            queue = QueueHelper.GetQueueReference("emails");
 
             bool result = base.OnStart();
 
-            NotificationsServer = new NotificationsServer();
-            NotificationsServer.Open();
+            //NotificationsServer = new NotificationsServer();
+            //NotificationsServer.Open();
 
             Trace.TraceInformation("NotificationService has been started");
 
@@ -62,7 +73,7 @@ namespace NotificationService
             this.runCompleteEvent.WaitOne();
 
             base.OnStop();
-            NotificationsServer.Close();
+            //NotificationsServer.Close();
 
             Trace.TraceInformation("NotificationService has stopped");
         }
@@ -73,6 +84,10 @@ namespace NotificationService
             while (!cancellationToken.IsCancellationRequested)
             {
                 Trace.TraceInformation("Working");
+
+                await HealthCheckMailService.SendEmailsFromQueueAsync(queue);
+                await CloseQuestionMailService.ProcessTopAnswerQueueAsync();
+
                 await Task.Delay(1000);
             }
         }

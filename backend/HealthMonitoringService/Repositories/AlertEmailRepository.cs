@@ -32,6 +32,38 @@ namespace HealthMonitoringService.Repositories
             var segment = await _table.ExecuteQuerySegmentedAsync(query, null);
             return segment.Results;
         }
-              
+
+        public async Task UpdateEmailStatusAsync(string rowKey, bool status)
+        {
+            TableOperation retrieve = TableOperation.Retrieve<AlertEmailEntity>("Alert", rowKey);
+            TableResult result = await _table.ExecuteAsync(retrieve);
+            var entity = result.Result as AlertEmailEntity;
+
+            if (entity != null)
+            {
+                entity.IsEmailReceived = status;
+                entity.ETag = "*";
+                var update = TableOperation.Replace(entity);
+                await _table.ExecuteAsync(update);
+            }
+        }
+
+        public async Task ResetAllEmailStatusesAsync()
+        {
+            var query = new TableQuery<AlertEmailEntity>().Where(
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "Alert"));
+
+            var segment = await _table.ExecuteQuerySegmentedAsync(query, null);
+
+            foreach (var entity in segment.Results)
+            {
+                entity.IsEmailReceived = false;
+                entity.ETag = "*"; // overwrite without version check
+                var operation = TableOperation.Replace(entity);
+                await _table.ExecuteAsync(operation);
+            }
+        }
+
+
     }
 }

@@ -30,19 +30,28 @@ namespace HealthMonitoringService.HelperMethods
             try
             {
                 List<AlertEmailEntity> emails = await alertRepo.GetAllEmailsAsync();
+                int count = 0;
 
                 foreach (var email in emails)
                 {
-                    CloudQueueMessage message = new CloudQueueMessage(email.EmailAddress);
-                    await queue.AddMessageAsync(message);
+                    if (!email.IsEmailReceived)
+                    {
+                        CloudQueueMessage message = new CloudQueueMessage(email.EmailAddress);
+                        await queue.AddMessageAsync(message);
+
+                        // ➕ OVDJE ažuriraš status na true
+                        await alertRepo.UpdateEmailStatusAsync(email.RowKey, true);
+                        count++;
+                    }
                 }
 
-                Trace.TraceInformation($"[QUEUE] Enqueued {emails.Count} email(s)");
+                Trace.TraceInformation($"[QUEUE] Enqueued {count} email(s)");
             }
             catch (Exception ex)
             {
                 Trace.TraceError($"[QUEUE] Failed to enqueue alert emails: {ex.Message}");
             }
         }
+
     }
 }

@@ -17,8 +17,10 @@ namespace AdminToolsConsoleApp.Entities
             PartitionKey = "Alert";
             RowKey = Guid.NewGuid().ToString();
             EmailAddress = email;
+            IsEmailReceived = false;
         }
 
         public string EmailAddress { get; set; }
+        public bool IsEmailReceived { get; set; }
     }
 }

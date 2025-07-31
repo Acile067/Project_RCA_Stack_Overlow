@@ -76,6 +76,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AdminToolsConsoleApp\AdminToolsConsoleApp.csproj">
+      <Project>{B2DB9191-8C6E-476F-8D5D-FD6D262AA536}</Project>
+      <Name>AdminToolsConsoleApp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NotificationService\NotificationService.csproj">
       <Project>{3761b5d9-3386-4890-ba83-66b9e5f1545b}</Project>
       <Name>NotificationService</Name>
