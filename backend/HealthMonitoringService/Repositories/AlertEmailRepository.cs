@@ -64,6 +64,7 @@ namespace HealthMonitoringService.Repositories
             }
         }
 
+        public CloudTable GetTable() => _table;
 
     }
 }

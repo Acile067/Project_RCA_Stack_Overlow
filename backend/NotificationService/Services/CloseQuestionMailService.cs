@@ -68,6 +68,7 @@ namespace NotificationService.Services
                     subject: "Question closed",
                     body: $"Question you left an answer for has been closed by user: {username}.\n" +
                     $"Best answer is:\n{answer.Description}");
+                Trace.TraceInformation($"[HandleTopAnswerAsync] Email sent to {email}");
             }
 
             try

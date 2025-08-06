@@ -18,9 +18,9 @@ namespace NotificationService.Servers
         private string endPointName = "HealthMonitoring";
         public NotificationsServer()
         {
-            RoleInstanceEndpoint inputEndPoint = RoleEnvironment.
+            RoleInstanceEndpoint internalEndPoint = RoleEnvironment.
             CurrentRoleInstance.InstanceEndpoints[endPointName];
-            string endpoint = string.Format("net.tcp://{0}/{1}", inputEndPoint.IPEndpoint,
+            string endpoint = string.Format("net.tcp://{0}/{1}", internalEndPoint.IPEndpoint,
             endPointName);
             serviceHost = new ServiceHost(typeof(HealthMonitoringService));
             NetTcpBinding binding = new NetTcpBinding();

@@ -1,6 +1,7 @@
 ﻿using HealthMonitoringService.Entities;
 using HealthMonitoringService.HelperMethods;
 using HealthMonitoringService.Repositories;
+using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage.Queue;
 using NotificationService.Contracts;
 using System;
@@ -21,6 +22,7 @@ namespace HealthMonitoringService.HelperMethods
             string url = "http://localhost:5050/HealthMonitoring";
 
             bool isOk = await PingHttpServiceAsync(url);
+            Trace.TraceInformation($"[HEALTH] StackOverflowService is alive.");
             await checkRepo.SaveHealthCheckAsync(serviceName, isOk);
 
             if (!isOk)
@@ -30,14 +32,38 @@ namespace HealthMonitoringService.HelperMethods
         public static async Task CheckNotificationServiceAsync(HealthCheckRepository checkRepo, AlertEmailRepository alertRepo, CloudQueue queue)
         {
             string serviceName = "NotificationService";
-            string endpoint = "net.tcp://localhost:10100/HealthMonitoring";
+            bool isOk = false;
 
-            bool isOk = PingWcfService(endpoint);
+            try
+            {
+                var instances = RoleEnvironment.Roles["NotificationService"].Instances;
+
+                foreach (var instance in instances)
+                {
+                    var endpointInfo = instance.InstanceEndpoints["HealthMonitoring"];
+                    string endpoint = $"net.tcp://{endpointInfo.IPEndpoint}/HealthMonitoring";
+
+                    if (PingWcfService(endpoint))
+                    {
+                        Trace.TraceInformation($"[HEALTH] NotificationService is alive.");
+                        isOk = true;
+                        break;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"[HEALTH] Error while checking NotificationService: {ex.Message}");
+                isOk = false;
+            }
+
             await checkRepo.SaveHealthCheckAsync(serviceName, isOk);
 
             if (!isOk)
                 await QueueHelper.EnqueueAlertEmailsAsync(alertRepo, queue);
         }
+
 
         private static async Task<bool> PingHttpServiceAsync(string url)
         {

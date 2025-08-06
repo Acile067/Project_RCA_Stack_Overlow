@@ -42,8 +42,6 @@ namespace NotificationService
         {
 
             Env.Load();
-            Trace.TraceInformation("MAIL_USERNAME = " + Environment.GetEnvironmentVariable("MAIL_USERNAME"));
-            Trace.TraceInformation("Current directory = " + Environment.CurrentDirectory);
             // Use TLS 1.2 for Service Bus connections
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -57,8 +55,8 @@ namespace NotificationService
 
             bool result = base.OnStart();
 
-            //NotificationsServer = new NotificationsServer();
-            //NotificationsServer.Open();
+            NotificationsServer = new NotificationsServer();
+            NotificationsServer.Open();
 
             Trace.TraceInformation("NotificationService has been started");
 
@@ -73,7 +71,7 @@ namespace NotificationService
             this.runCompleteEvent.WaitOne();
 
             base.OnStop();
-            //NotificationsServer.Close();
+            NotificationsServer.Close();
 
             Trace.TraceInformation("NotificationService has stopped");
         }

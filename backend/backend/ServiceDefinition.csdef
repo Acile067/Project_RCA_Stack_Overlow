@@ -38,7 +38,7 @@
       <Setting name="DataConnectionString" />
     </ConfigurationSettings>
     <Endpoints>
-      <InputEndpoint name="HealthMonitoring" protocol="tcp" port="10100" />
+      <InternalEndpoint name="HealthMonitoring" protocol="tcp" />
     </Endpoints>
   </WorkerRole>
   <WorkerRole name="HealthMonitoringService" vmsize="Standard_D1_v2">

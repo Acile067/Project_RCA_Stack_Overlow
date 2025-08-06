@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using HealthMonitoringService.Repositories;
 using HealthMonitoringService.Entities;
 using System.Diagnostics;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace HealthMonitoringService.HelperMethods
 {
@@ -34,14 +35,30 @@ namespace HealthMonitoringService.HelperMethods
 
                 foreach (var email in emails)
                 {
-                    if (!email.IsEmailReceived)
+                    // 🔒 Provera da li je već enqueued
+                    if (email.IsEmailReceived)
+                        continue;
+
+                    // Postavi flag na true pre nego što enqueue-uješ
+                    email.IsEmailReceived = true;
+                    email.ETag = "*"; // force update
+
+                    try
                     {
-                        CloudQueueMessage message = new CloudQueueMessage(email.EmailAddress);
+                        // ⚠ Ažuriraj status u tabeli — ako druga instanca pokuša isto, samo jedna će proći
+                        var updateOp = TableOperation.Replace(email);
+                        await alertRepo.GetTable().ExecuteAsync(updateOp); // expose GetTable() from repository
+
+                        // ✅ Tek sada dodaj poruku u queue
+                        var message = new CloudQueueMessage(email.EmailAddress);
                         await queue.AddMessageAsync(message);
 
-                        // ➕ OVDJE ažuriraš status na true
-                        await alertRepo.UpdateEmailStatusAsync(email.RowKey, true);
                         count++;
+                    }
+                    catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == 412)
+                    {
+                        // ❌ Druga instanca je već ažurirala - ignorisi
+                        Trace.TraceInformation($"[QUEUE] Email {email.EmailAddress} already handled by another instance.");
                     }
                 }
 
@@ -52,6 +69,7 @@ namespace HealthMonitoringService.HelperMethods
                 Trace.TraceError($"[QUEUE] Failed to enqueue alert emails: {ex.Message}");
             }
         }
+
 
     }
 }
