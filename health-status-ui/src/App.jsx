@@ -50,7 +50,7 @@ function App() {
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow rounded-2xl">
       <h1 className="text-2xl font-bold mb-6 text-center">
-        Service Health Summary (last 3h)
+        Stack Overflow Health Summary (last 3h)
       </h1>
 
       <div className="grid grid-cols-2 gap-6 text-center">
