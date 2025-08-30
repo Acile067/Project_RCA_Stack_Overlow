@@ -44,14 +44,14 @@ const NavbarLinks = ({ authenticated, userId, handleLogout }) => {
           </li>
 
           {/* Common links for all authenticated users */}
-          <li>
+          {/*<li>
             <Link
               to="/test"
               className="block mt-1 py-2 px-3 text-gray-900 rounded-lg hover:bg-gray-100 md:hover:bg-transparent md:p-0 text-base font-medium text-center"
             >
               Test
             </Link>
-          </li>
+          </li> */}
           <li className="md:hidden">
             <button
               onClick={handleLogout}

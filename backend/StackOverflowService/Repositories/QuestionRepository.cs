@@ -14,12 +14,12 @@ namespace StackOverflowService.Repositories
     public class QuestionRepository
     {
         private readonly CloudTable _table;
-        private readonly CloudTableClient _tableClient;  // <-- dodaj ovo
+        private readonly CloudTableClient _tableClient; 
 
         public QuestionRepository()
         {
             var storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
-            _tableClient = storageAccount.CreateCloudTableClient();  // <-- ovako kreiramo klienta za tabele
+            _tableClient = storageAccount.CreateCloudTableClient();  
             _table = _tableClient.GetTableReference("Question");
             _table.CreateIfNotExists();
         }
@@ -33,7 +33,10 @@ namespace StackOverflowService.Repositories
         {
             var query = new TableQuery<QuestionTableEntity>();
             var segment = await _table.ExecuteQuerySegmentedAsync(query, null);
-            return segment.Results;
+
+            return segment.Results
+                          .OrderByDescending(q => q.UpdatedAt)
+                          .ToList();
         }
 
         public async Task<List<QuestionTableEntity>> GetQuestionsByDateRangeAsync(DateTime from, DateTime to)

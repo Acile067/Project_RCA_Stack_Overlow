@@ -114,13 +114,14 @@ namespace NotificationService.Services
             while (true)
             {
                 var message = await queue.GetMessageAsync();
-                if (message == null) break;
+                if (message != null)
+                {
+                    string topAnswerId = message.AsString;
+                    await HandleTopAnswerAsync(topAnswerId);
+                    await queue.DeleteMessageAsync(message);
+                }
 
-                string topAnswerId = message.AsString;
-
-                await HandleTopAnswerAsync(topAnswerId);
-
-                await queue.DeleteMessageAsync(message); 
+                await Task.Delay(TimeSpan.FromSeconds(5));
             }
         }
 
