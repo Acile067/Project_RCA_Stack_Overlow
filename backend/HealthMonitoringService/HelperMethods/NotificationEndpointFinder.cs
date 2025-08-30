@@ -12,7 +12,7 @@ namespace HealthMonitoringService.HelperMethods
         public static string GetHealthMonitoringEndpoint()
         {
             var role = RoleEnvironment.Roles["NotificationService"];
-            var instance = role.Instances.First(); // ili prođi kroz sve ako želiš failover/load balancing
+            var instance = role.Instances.First();
             var endpoint = instance.InstanceEndpoints["HealthMonitoring"];
 
             return $"net.tcp://{endpoint.IPEndpoint}/HealthMonitoring";

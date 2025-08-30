@@ -35,21 +35,17 @@ namespace HealthMonitoringService.HelperMethods
 
                 foreach (var email in emails)
                 {
-                    // 🔒 Provera da li je već enqueued
                     if (email.IsEmailReceived)
                         continue;
 
-                    // Postavi flag na true pre nego što enqueue-uješ
                     email.IsEmailReceived = true;
-                    email.ETag = "*"; // force update
+                    email.ETag = "*";
 
                     try
                     {
-                        // ⚠ Ažuriraj status u tabeli — ako druga instanca pokuša isto, samo jedna će proći
                         var updateOp = TableOperation.Replace(email);
-                        await alertRepo.GetTable().ExecuteAsync(updateOp); // expose GetTable() from repository
+                        await alertRepo.GetTable().ExecuteAsync(updateOp);
 
-                        // ✅ Tek sada dodaj poruku u queue
                         var message = new CloudQueueMessage(email.EmailAddress);
                         await queue.AddMessageAsync(message);
 
@@ -57,7 +53,6 @@ namespace HealthMonitoringService.HelperMethods
                     }
                     catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == 412)
                     {
-                        // ❌ Druga instanca je već ažurirala - ignorisi
                         Trace.TraceInformation($"[QUEUE] Email {email.EmailAddress} already handled by another instance.");
                     }
                 }

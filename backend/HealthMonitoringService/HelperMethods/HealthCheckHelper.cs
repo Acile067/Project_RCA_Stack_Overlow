@@ -22,11 +22,16 @@ namespace HealthMonitoringService.HelperMethods
             string url = "http://localhost:5050/HealthMonitoring";
 
             bool isOk = await PingHttpServiceAsync(url);
-            Trace.TraceInformation($"[HEALTH] StackOverflowService is alive.");
+            if (isOk)
+                Trace.TraceInformation($"[HEALTH] StackOverflowService is alive.");
+
             await checkRepo.SaveHealthCheckAsync(serviceName, isOk);
 
             if (!isOk)
+            {
+                Trace.TraceInformation($"[HEALTH] StackOverflowService is NOT alive.");
                 await QueueHelper.EnqueueAlertEmailsAsync(alertRepo, queue);
+            }      
         }
 
         public static async Task CheckNotificationServiceAsync(HealthCheckRepository checkRepo, AlertEmailRepository alertRepo, CloudQueue queue)
@@ -49,6 +54,10 @@ namespace HealthMonitoringService.HelperMethods
                         isOk = true;
                         break;
                     }
+                    else
+                    {
+                        Trace.TraceWarning($"[HEALTH] NotificationService instance {instance.Id} is NOT responding.");
+                    }
                 }
 
             }
@@ -61,7 +70,10 @@ namespace HealthMonitoringService.HelperMethods
             await checkRepo.SaveHealthCheckAsync(serviceName, isOk);
 
             if (!isOk)
+            {
+                Trace.TraceInformation($"[HEALTH] NotificationService is NOT alive.");
                 await QueueHelper.EnqueueAlertEmailsAsync(alertRepo, queue);
+            }   
         }
 
 

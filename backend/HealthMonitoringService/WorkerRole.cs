@@ -70,7 +70,7 @@ namespace HealthMonitoringService
                 var notificationCheck = HealthCheckHelper.CheckNotificationServiceAsync(checkRepo, alertRepo, queue);
 
                 await Task.WhenAll(stackOverflowCheck, notificationCheck);
-                await Task.Delay(4000, token);
+                await Task.Delay(400000, token);
             }
         }
     }
