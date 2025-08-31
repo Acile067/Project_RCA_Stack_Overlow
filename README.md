@@ -40,7 +40,17 @@ The goal of this project is to gain hands-on experience with cloud-based data st
    cd Project_RCA_Stack_Overlow
    ```
 
-2. **Dotnet CLI API**:
+   Add `.env` in `backend/NotificationService` example:
+   ```bash
+   MAIL_USERNAME=aleksandarsasastefanjovana@gmail.com
+   MAIL_PASSWORD=upzg sndq xnhh qyks
+   MAIL_SERVER=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USE_TLS=true
+   MAIL_USE_SSL=false
+   ```
+
+3. **Dotnet CLI API**:
    
     ```bash
    cd backend/backend
